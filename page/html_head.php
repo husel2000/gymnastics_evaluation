@@ -57,8 +57,8 @@
 				id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
 					<li class="<?php if(Nav::_get_akt() == "wettkampf") echo "active";?>"><a href="<?php echo Nav::_link_create("wettkampf"); ?>">Wettkampf</a></li>
-					
 					<li class="<?php if(Nav::_get_akt() == "turner") echo "active";?>"><a href="<?php echo Nav::_link_create("turner"); ?>">Turner</a></li>
+					<li class="<?php if(Nav::_get_akt() == "riegenliste") echo "active";?>"><a href="<?php echo Nav::_link_create("riegenliste"); ?>">Riegenliste</a></li>
 				</ul>
 			</div>
 			<!-- /.navbar-collapse -->
