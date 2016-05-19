@@ -3,6 +3,18 @@
 	$riegentext = $res[0][0];
 ?>
 <script type="text/javascript">
+function form_riegenliste_plausi_submit(data) {
+	if(data['missing'] == 0) {
+		dialog_create("Keine Fehler gefunden");
+	}else {
+		if(data['missing'] == 1) {
+			dialog_create("Es wurde " + data['missing'] + " fehlender Datensatz hinzugefügt");
+		}else {
+			dialog_create("Es wurden " + data['missing'] + " fehlende Datensätze hinzugefügt");
+		}
+		$('#form_riegenliste_get').submit();
+	}
+}
 function form_riegenliste_initial_submit(data) {
 	dialog_create(data);
 	$('#form_riegenliste_get').submit();
@@ -67,27 +79,23 @@ function form_riegenliste_get_submit(data) {
 		Object.keys(data[riege_liste]).forEach(function (key) {
 			var divRiege = $('<div />');
 			divRiege.append($('<button/>', {
-        		text: "/\\",
-        		class: ' ui-button',
+        		class: 'button_up',
         		onclick: "table_riegenliste_riege_switch(this,'-')"
     		}));
     		divRiege.append($('<span />', { text: riege_liste}));
     		divRiege.append($('<button/>', {
-        		text: "\\/",
-        		class: ' ui-button',
+        		class: 'button_down',
         		onclick: "table_riegenliste_riege_switch(this,'+')"
     		}));
     		
     		var divPos = $('<div />');
 			divPos.append($('<button/>', {
-        		text: "/\\",
-        		class: ' ui-button',
+        		class: 'button_up',
         		onclick: "table_riegenliste_pos_switch(this,'-')"
     		}));
     		divPos.append($('<span />', { text: key}));
     		divPos.append($('<button/>', {
-        		text: "\\/",
-        		class: ' ui-button',
+        		class: 'button_down',
         		onclick: "table_riegenliste_pos_switch(this,'+')"
     		}));
 			
@@ -122,6 +130,11 @@ function form_riegenliste_initial_show() {
 $( document ).ready(function() { $('#form_riegenliste_get').submit(); });
 
 </script>
+<!-- Riegenliste Plausi -->
+<form style="display:none;" class="form-horizontal form_ajax" id="form_riegenliste_plausi" role="form" action="<?php echo Nav::_link_create_ajax(Nav::_get_akt()) ?>" method="POST">
+	<input type="hidden" name="action" value="plausi">
+	<input type="hidden" name="id_riegenliste" value="<?php echo $_GET['id_riegenliste']; ?>">
+</form>
 <!-- Riegenliste laden -->
 <form style="display:none;" class="form-horizontal form_ajax" id="form_riegenliste_get" role="form" action="<?php echo Nav::_link_create_ajax(Nav::_get_akt()) ?>" method="POST">
 	<input type="hidden" name="action" value="get">
@@ -155,6 +168,7 @@ $( document ).ready(function() { $('#form_riegenliste_get').submit(); });
 </div>
 <h1><span class="label label-default">Riegenliste <?php echo $riegentext; ?> bearbeiten</span></h1>
 <button class="btn-default" onclick="form_riegenliste_initial_show()">Initiale Verteilung</button>
+<button class="btn-default" onclick="$('#form_riegenliste_plausi').submit()">Plausibilisieren</button>
 <table class="table_data" id="table_riegenliste">
 	<thead>
 		<tr>

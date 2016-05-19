@@ -48,6 +48,33 @@ require_once("../config.php");
 	background-image:url(<?php echo URIIMAGES . "icon-edit.png"; ?>);
 	background-repeat: no-repeat;
 	background-position: 50% center;
+	
+}
+
+.button_up {
+	background-size: 100%;
+	width:1.5em;
+	height:1.5em;
+	margin:0px;
+	padding:0px;
+	background-color: Transparent;
+	background-image:url(<?php echo URIIMAGES . "arrow-up.png"; ?>);
+	background-repeat: no-repeat;
+	background-position: 50% center;
+	border: none;
+}
+
+.button_down {
+	background-size: 100%;
+	width:1.5em;
+	height:1.5em;
+	margin:0px;
+	padding:0px;
+	background-image:url(<?php echo URIIMAGES . "arrow-down.png"; ?>);
+	background-color: Transparent;
+	background-repeat: no-repeat;
+	background-position: 50% center;
+	border: none;
 }
 
 .button_delete {

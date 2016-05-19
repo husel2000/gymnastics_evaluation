@@ -7,6 +7,19 @@ if(empty($_POST['action'])) {
 	$error = True;
 	$error_text = "Interner Fehler, keine Action angegeben";
 	return;
+}elseif($_POST['action'] == "plausi") {
+	$id_riegenliste = $_POST['id_riegenliste'];
+	$res = db_select("Select distinct a.id_turner,b.id_wettkampf from wettkampf_geraet_turner a, wettkampf_geraet b Where
+		a.id_wettkampf_geraet = b.id_wettkampf_geraet and b.id_wettkampf IN (Select id_wettkampf From riegenliste_wettkampf Where id_riegenliste = ?)
+		and a.id_turner NOT IN (Select id_turner FROM riegenliste_liste Where id_riegenliste = ?)",$id_riegenliste,$id_riegenliste);
+	$data = Array("missing" => sizeof($res));
+	//Fehlenen Turner in neue Riege stecken
+	$res2 = db_select("Select max(riege_no)+1 From riegenliste_liste where id_riegenliste = ?",$id_riegenliste);
+	$riege_no = $res2[0][0];
+	for($i = 0; $i < sizeof($res); $i++) {
+		db_select("INSERT INTO riegenliste_liste(id_riegenliste,riege_no,reihenfolge,id_turner,id_wettkampf) VALUES(?,?,?,?,?)",$id_riegenliste,$riege_no,$i+1,$res[0][0],$res[0][1]);
+	}
+	
 }elseif($_POST['action'] == "get") {
 	$id_riegenliste = $_POST['id_riegenliste'];
 
