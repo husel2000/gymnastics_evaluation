@@ -26,7 +26,7 @@ if(empty($_POST['action'])) {
 	$sql = "Select id_turner,name,vorname,verein from turner where id_turner NOT IN (".
 				"Select distinct id_turner From wettkampf_geraet_turner Where id_wettkampf_geraet IN (".
 				"Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = ?".
-				"))";
+				")) ORDER BY name,vorname";
 	$res = db_select($sql,$id_wettkampf);
 	$data = Array();
 	foreach($res As $turner) {

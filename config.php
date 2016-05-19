@@ -5,10 +5,10 @@ Rules:
 - If Link defined, always add "/" if its a folder
 */
 
-define("PATH_ROOT","/home/maweber/git/wettkampf/");
+define("PATH_ROOT","/home/maweber/bin/php/wettkampf/");
 define("PAGE_TITEL","Wettkampf-Verwaltung");
 
-define("URIIMAGES", "/images/");
+define("URIIMAGES", "/wettkampf/images/");
 
 //Paths (Filesystem)
 define("FOLDERPAGE",PATH_ROOT . "page/");
@@ -26,8 +26,8 @@ define("SITEAJAXSUFFIX","_ajax.php");
 
 //Database
 define("DBHOST","localhost");
-define("DBUSER","root");
-define("DBPASS","");
+define("DBUSER","wettkampfuser");
+define("DBPASS","***REMOVED***");
 define("DBNAME","wettkampf");
 
 //Include all Classes from lib-php

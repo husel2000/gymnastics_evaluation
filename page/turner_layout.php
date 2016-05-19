@@ -63,6 +63,9 @@
 			$('#create_nachname').val(ele.nachname);
 			$('#create_vorname').val(ele.vorname);
 			$('#create_verein').val(ele.verein);
+			if(ele.geburtsdatum.match(/..\/..\/..../)) {
+				ele.geburtsdatum = ele.geburtsdatum.replace(/\//g,".");
+			} 
 			$('#create_geburtsdatum').val(ele.geburtsdatum);
 			$('#create_pass').val(ele.pass);
 			$('#create_pass_gueltig').val(ele.pass_gueltig);
