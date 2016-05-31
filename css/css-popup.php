@@ -3,9 +3,9 @@ header("Content-type: text/css");
 //04.09.2015 - Ma.Weber - in .popup width to min-width
 ?>
 .popup {
-	min-width: 300px; 
+	min-width: 500px; 
 	padding:1em;
-	padding-right:5em;
+	padding-right:3em;
 	border-radius: 10px;
 	box-shadow: 0px 0px 25px 5px #999;
 	background-color: #FFF;

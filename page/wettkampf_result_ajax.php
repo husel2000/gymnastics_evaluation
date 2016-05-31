@@ -1,4 +1,5 @@
 <?php
+//27.05.2016 - Ma.Weber - Alter mit prüfen!
 
 $error = False;
 $error_text = "";
@@ -40,6 +41,19 @@ if(empty($_POST['action'])) {
 	db_select($sql,$ausgang,$abzug,$id);
 }elseif($_POST['action'] == "turner_add") {
 	$id_wettkampf = $_POST['id_wettkampf'];
+	//Alters-Grenze für Wettkampf suchen und alle prüfen!
+	$res = db_select("Select jahrgang_min, jahrgang_max From wettkampf where id_wettkampf = ?",$id_wettkampf);
+	$jahrgang_min = $res[0][0];
+	$jahrgang_max = $res[0][1];
+	foreach($_POST['turner'] As $id_turner) {
+		$res = db_select("Select YEAR(geburtsdatum),name,vorname from turner WHERE id_turner = ?",$id_turner);
+		if($res[0][0] < $jahrgang_max || $res[0][0] > $jahrgang_min) {
+			$error = true;
+			$error_text .= "Für Wettkampf Jahrgang " . $jahrgang_min . " - " . $jahrgang_max . " ist Turnerin " . $res[0][2] . " " . $res[0][1] . " (" . $res[0][0] . ") nicht zugelassen!";
+			return;
+		}
+	}
+	
 	//Geräte des Wettkampfes suchen
 	$sql = "Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = ?";
 	$res = db_select($sql,$id_wettkampf);

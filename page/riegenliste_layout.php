@@ -4,6 +4,10 @@ function form_riegenliste_create_show() {
 	dialog_create($('#form_riegenliste_create')[0])
 }
 
+function form_riegenliste_create_submit(data) {
+	
+}
+
 function form_riegenliste_search_submit(data) {
 		var t = $("#riegenliste_search_table").DataTable();
 		t.clear().draw();
@@ -47,7 +51,6 @@ $( document ).ready(function() { $('#form_riegenliste_search').submit(); });
 			<label class = "control-label col-sm-2">Wettkämpfe</label>
 			<div class="col-sm-10">
 				<select multiple class="form-control" name="create_id_wettkampf[]" id="sel1">
-					<option value="">Auswählen</option>
 <?php $res = db_select("Select id_wettkampf,date_format(datum,'%d.%m.%Y'), bezeichnung from wettkampf order by datum desc");
 	foreach($res As $wettkampf) {
 		echo "<option value=\"". $wettkampf[0] ."\">" . $wettkampf[1] . " - " . $wettkampf[2] ."</option>";

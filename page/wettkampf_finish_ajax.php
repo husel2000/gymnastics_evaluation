@@ -12,8 +12,8 @@ if(empty($_POST['action'])) {
 	$id_wettkampf = $_POST['id_wettkampf'];
 	
 	//Wettkampf-Typ ermitteln
-	$res = db_select("Select typ,opt_text1,opt_text2 From wettkampf where id_wettkampf = ?",$id_wettkampf);
-	$arr_return = Array("typ"=>$res[0][0],"result"=>Array());
+	$res = db_select("Select typ,opt_text1,opt_text2,bezeichnung From wettkampf where id_wettkampf = ?",$id_wettkampf);
+	$arr_return = Array("typ"=>$res[0][0],"id_wettkampf"=>$id_wettkampf,"bezeichnung"=>$res[0][3],"result"=>Array());
 	$arr_result = Array();
 	if($res[0][0] == "einzel_bereich") {
 		$gold_min = $res[0][1];
@@ -43,33 +43,5 @@ if(empty($_POST['action'])) {
 		$arr_return['result'] = $arr_result;
 		$data = $arr_return;
 	}
-	/*
-	$sql = "Select distinct name From wettkampf_geraet_turner where ".
-			"id_wettkampf_geraet IN(Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = ?) order by name";
-	$res = db_select($sql,$id_wettkampf);
-	//Alle Turner des Wettkampfes als Key in Array
-	foreach($res As $row) {
-		//Jeden Turner die Punktzahl ausrechnen
-		$sql = "Select sum(wert_ausgang-wert_abzug) From wettkampf_geraet_turner where name = ? and id_wettkampf_geraet IN" .
-				"(Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = ?)";
-		$res = db_select($sql,$row[0],$id_wettkampf);
-		$arr_turner[$row[0]] = $res[0][0];
-	}	
-	//Data-Array mit korrekter Sortierung
-    arsort($arr_turner);
-    $data = Array();
-    foreach($arr_turner As $turner => $points) {
-    	$arr = Array("name" => $turner, "points" => $points);
-    	$sql = "Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = ? order by reihenfolge";
-    	$arr_geraet = db_select($sql,$id_wettkampf);
-    	$arr['geraet'] = Array();
-    	foreach($arr_geraet As $geraet) {
-    		$sql = "Select sum(wert_ausgang - wert_abzug) From wettkampf_geraet_turner where id_wettkampf_geraet = ? and name = ?";
-    		$tmp = db_select($sql,$geraet[0],$turner);
-    		$arr['geraet'][] = $tmp[0][0];
-    	}
-    	$data[] = $arr;
-    }
-    */
 }
 ?>

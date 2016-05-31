@@ -44,7 +44,7 @@ function dataTable_edit_init() {
 	$(".table_data_edit").DataTable( {
 			paging: false,
 			dom: 'Bfrtip',
-			buttons: [ 'csv' ],
+			buttons: [ 'csv', 'excel' ],
 			"aaSorting": [],
 			"createdRow": function ( row, data, index ) {
 				$('td',row).eq(0).hide();

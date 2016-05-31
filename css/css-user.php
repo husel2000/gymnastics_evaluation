@@ -48,7 +48,17 @@ require_once("../config.php");
 	background-image:url(<?php echo URIIMAGES . "icon-edit.png"; ?>);
 	background-repeat: no-repeat;
 	background-position: 50% center;
-	
+}
+
+.button_edit2 {
+	background-size: 100%;
+	width:5em;
+	height:5em;
+	margin:0px;
+	padding:0px;
+	background-image:url(<?php echo URIIMAGES . "icon-edit2.png"; ?>);
+	background-repeat: no-repeat;
+	background-position: 50% center;
 }
 
 .button_up {

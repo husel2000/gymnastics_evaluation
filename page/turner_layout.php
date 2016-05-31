@@ -1,13 +1,21 @@
 <script type="text/javascript">
-
 	function turner_is_double(vorname,nachname) {
 		is_double = false;
-		$("tbody > tr").each(function(i,ele) {
-			if($(ele).html().toUpperCase().indexOf(">" +vorname.toUpperCase() + "<") != -1) {
-				if($(ele).html().toUpperCase().indexOf(">" + nachname.toUpperCase() + "<") != -1) {
+		
+		soundex_nachname = soundex(nachname);
+		soundex_vorname = soundex(vorname);
+		$("tbody > tr").each(function(i,ele){ 
+			if(soundex($(ele).find("td:eq(1)").text()) === soundex_nachname) {
+				if(soundex($(ele).find("td:eq(2)").text()) === soundex_vorname) {	
+					is_double = true;	
+				}
+			}
+			//Save, if Something with Soundex is Wrong
+			/*if($(ele).html().toUpperCase().indexOf("" +vorname.toUpperCase() + "") != -1) {
+				if($(ele).html().toUpperCase().indexOf("" + nachname.toUpperCase() + "") != -1) {
 					is_double = true;
 				}
-			}	
+			}*/
 		});
 		return is_double;
 	}
@@ -26,7 +34,7 @@
 
 	function form_turner_create_submit(data) {
 		turner_table_list_add(data);
-		$('#form_turner_create').parent().find(".popup_button_close").trigger("click"); //Popup-Fenster schließen
+		dialog_close("#form_turner_create")
 	}
 
 	function turner_table_list_add(dataRow) {
@@ -63,9 +71,11 @@
 			$('#create_nachname').val(ele.nachname);
 			$('#create_vorname').val(ele.vorname);
 			$('#create_verein').val(ele.verein);
-			if(ele.geburtsdatum.match(/..\/..\/..../)) {
-				ele.geburtsdatum = ele.geburtsdatum.replace(/\//g,".");
-			} 
+			if(typeof(ele.geburtsdatu) != "undefined") {
+				if(ele.geburtsdatum.match(/..\/..\/..../)) {
+					ele.geburtsdatum = ele.geburtsdatum.replace(/\//g,".");
+				} 
+			}
 			$('#create_geburtsdatum').val(ele.geburtsdatum);
 			$('#create_pass').val(ele.pass);
 			$('#create_pass_gueltig').val(ele.pass_gueltig);
@@ -114,7 +124,7 @@
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="create_geburtsdatum">Geburtsdatum</label>
 			<div class="col-sm-10">
-				<input type="date" class="form-control" id="create_geburtsdatum" name="geburtsdatum" placeholder="dd.mm.yyyy">
+				<input type="date" class="form-control input_date" id="create_geburtsdatum" name="geburtsdatum" placeholder="dd.mm.yyyy">
 			</div>
 		</div>
 		<div class="form-group">
@@ -126,7 +136,7 @@
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="create_pass_gueltig">Gültig</label>
 			<div class="col-sm-10">
-				<input type="date" class="form-control" id="create_pass_gueltig" name="pass_gueltig" placeholder="dd.mm.yyyy">
+				<input type="date" class="form-control input_date" id="create_pass_gueltig" name="pass_gueltig" placeholder="dd.mm.yyyy">
 			</div>
 		</div>
 		<div class="form-group">

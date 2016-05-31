@@ -1,3 +1,6 @@
+<?php
+	//30.05.2016 - Ma.Weber - Wenn "Bereichs-Wettkampf", dann Grenzen anzeigen und veränderbar
+?>
 <h1><span class="label label-default">Wettkampf bearbeiten</span></h1>
 <script type="text/javascript">	
 	$(document).ready( function () {
@@ -25,7 +28,7 @@
 	}
 	
 	function form_wettkampf_result_add_turner_submit(data) {
-		$('#div_form_wettkampf_result_add_turner').parent().find(".popup_button_close").trigger("click"); //Popup-Fenster schließen
+		dialog_close('#div_form_wettkampf_result_add_turner')
 		$('#form_wettkampf_result_add_turner')[0].reset();
 		$('#form_wettkampf_result_reload').submit();
 	}
@@ -133,8 +136,8 @@
 			if(!found) dialog_create(nachname + ", " + vorname + " ist nocht nicht als Turner angelegt!");
 		});
 
-		$('#turner_xls_columns').parent().find(".popup_button_close").trigger("click"); //Popup-Fenster schließen
-		$('#div_turner_xls_import').parent().find(".popup_button_close").trigger("click"); //Popup-Fenster schließen
+		dialog_close('#turner_xls_columns')
+		dialog_close('#div_turner_xls_import')
 	}
 	
 	$( document ).ready(function() {

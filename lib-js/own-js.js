@@ -1,5 +1,13 @@
+function dialog_close(ele) {
+	$(ele).closest(".popup").find(".popup_button_close").trigger("click");
+}
+
+function date_format_mysql_to_ger(mysql_date) {
+	dArr = mysql_date.split("-");  // ex input "2010-01-18"
+	return dArr[2]+ "." +dArr[1]+ "." +dArr[0]; //ex out: "18/01/2010"
+}
 function user_import_xls_start(arr_columns,callback) {
-	xls_callback = callback;
+	xls_callback = callback; //Save Callback, Used in user_import_xls_return_json
 	user_import_xls_select_file();
 	xls_arr_columns = arr_columns;
 }
@@ -14,9 +22,7 @@ function user_import_xls_import_file(file) {
 	var name = file.files[0].name;
 	reader.onload = function(e) {
 		var data = e.target.result;
-		/* if binary string, read with type 'binary' */
-		var workbook = XLSX.read(data, {type: 'binary'});
-		/* DO SOMETHING WITH workbook HERE */
+		var workbook = XLSX.raed(data, {type: 'binary'});
 		xls_obj_json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 		user_import_xls_ask_column();
 	};
@@ -47,7 +53,7 @@ function user_import_xls_ask_column() {
 function user_import_xls_return_json(div) {
 	var xls_json_translate = {}; //XLS-Column --> Target-Column
 	$(div).find("select").each(function() {
-		if(this.value != "" && this.value != "-") {
+		if(this.value !== "" && this.value != "-") {
 			xls_json_translate[this.value] = this.name;
 		}
 	});
@@ -64,7 +70,7 @@ function user_import_xls_return_json(div) {
 	
 	//Aufräumen...
 	$('.xls_import').each(function() {
-		$(this).parent().find(".popup_button_close").trigger("click"); //Popup-Fenster schließen
+		dialog_lose(this);
 	});
 	
 	xls_callback(xls_json_result);
@@ -185,35 +191,25 @@ function checkDateInput() {
 //Alle Inputs von der Klasse input_date mit Datumsauswahl ausstatten, falls es der Browser nicht kann
 function create_date_picker() {
 	//Browser Supports Input-Type "date"
-	if(checkDateInput()) return;
-	
-	var allInputs = $(".input_date");
-	for(i=0;i<allInputs.length;i++) {
-		$(allInputs[i]).datepicker({
-			dateFormat:'dd.mm.yy'
-		});
-	}
+	if(!checkDateInput()) $(".input_date").datepicker({ dateFormat:'dd.mm.yy' });
 }
 
 //Alle Tablellen von der Klasse table_data in eine Daten-Tabelle umwandeln
 function create_data_table() {
-	var allTable = $(".table_data");
-	for(i=0;i<allTable.length;i++) {
-		$(allTable[i]).DataTable( {
-			paging: false,
-			dom: 'Bfrtip',
-			buttons: [ 'csv', 'excel' ],
-            "aaSorting": []
-		});
-	}
+	var allTable = $(".table_data").DataTable( {
+		paging: false,
+		dom: 'Bfrtip', //Needed for Buttons
+		buttons: [ 'csv', 'excel' ],
+	    "aaSorting": [] //No Initial Sorting
+	});
 }
 
 //Alle Input von der Klasse input_time mit Uhrzeitauswahl ausstatten
 function create_time_picker() {
 	$('.input_time').datetimepicker({
-		  datepicker:false,
-		  format:'H:i'
-		});
+		datepicker:false,
+		format:'H:i'
+	});
 }
 
 //Funktionen die ausgeführt werden sollen, wenn eine Seite vollständig geladen ist
@@ -226,28 +222,20 @@ $(document).ready( function () {
 });
 
 function dialog_create_yesno(html_text,text_yes,text_no,callback) {
-	var divBackground = document.createElement('div');
-	 divBackground.className = "popup";
-
-	var buttonY = document.createElement('div');
-	buttonY.innerHTML = text_yes;
-	buttonY.className = "popup_button";
-	buttonY.onclick = function() { callback(true); $(divBackground).bPopup().close(); }
-	
-	var buttonN = document.createElement('div');
-	buttonN.innerHTML = text_no;
-	buttonN.className = "popup_button";
-	buttonN.onclick = function() { callback(false); $(divBackground).bPopup().close(); }
-
-	var p = document.createElement('p');
-	p.innerHTML = html_text;
-	divBackground.appendChild(p);
-	divBackground.appendChild(buttonN);
-	divBackground.appendChild(buttonY);
-	document.body.appendChild(divBackground);
-
-	$(divBackground).bPopup( {zIndex:99999,positionStyle: 'fixed'});
-	
+	var content = $('<div />');
+	called = false
+	content.append($('<p />', { text: html_text }));
+	content.append($('<div />',{
+		text: text_yes,
+		class:"popup_button b-close",
+		click: function() {called = true; callback(1); dialog_close(".popup") }
+	}));
+	content.append($('<div />',{
+		text: text_no,
+		class:"popup_button b-close",
+		click: function() { called = true; callback(0); content.closest(".popup").find(".popup_button_close").click() }
+	}));
+	dialog_create(content[0],function() { if(!called) callback(-1) });
 }
 
 function findHighestZIndex(elem) {
@@ -262,48 +250,44 @@ function findHighestZIndex(elem) {
 	return highest;
 }
 
-function dialog_create(obj) {
-	var divBackground = document.createElement('div');
-	divBackground.className = "popup";
-	
-	var buttonClose = document.createElement('div');
-	buttonClose.innerHTML = "X";
-	buttonClose.className = "popup_button_close";
-	buttonClose.onclick = function() { $(divBackground).bPopup().close(); }
-
+//Erzeugt ein Popup-Dialog
+function dialog_create(obj,callback_close,remove=true) {
+	//Popup
+	var divBackground = $('<div />', {class: "popup"});
+	//Close-Button
+	divBackground.append($('<div />', 
+	{	class: "popup_button_close b-close",
+		text: "X",
+	}));
+	//Add Content
 	var p;
-	if(isDOMElement(obj)) { 
-		p = obj
-	} else {
-		p = document.createElement('p');
-		p.innerHTML = obj;
-	}
-	
-	divBackground.appendChild(buttonClose);
-	divBackground.appendChild(p);
-	document.body.appendChild(divBackground);
-	
-	var zIndex = findHighestZIndex("popup");
-	
+	if(isDOMElement(obj)) { p = obj } 
+	else { p = $('<p />', { text: obj }); }
+	//Append to Body
+	var t = $('<div />');
+	t.css("max-height","500px")
+	t.css("overflow","scroll");
+	t.append(p)
+	divBackground.append(t);
+	$('body').append(divBackground);
+	//Create Popup-Dialog
 	$(divBackground).bPopup( {
-		zIndex:(zIndex+1),
-		positionStyle: 'fixed'
+		zIndex:(findHighestZIndex("popup")+1),
+		positionStyle: 'fixed',
+		onClose: function() { if(remove) $(divBackground).remove(); if(typeof callback_close === "function") callback_close(-1) },
+		speed: 650,
+        transition: 'slideIn',
+	    transitionClose: 'slideBack'
 	});
 }
 
 //Überprüft ob es sich bei dem übergebene Objekt um ein DOM-Element handelt... http://stackoverflow.com/questions/384286/javascript-isdom-how-do-you-check-if-a-javascript-object-is-a-dom-object
 function isDOMElement(obj) {
-  try {
-    //Using W3 DOM2 (works for FF, Opera and Chrom)
-    return obj instanceof HTMLElement;
-  }
-  catch(e){
-    //Browsers not supporting W3 DOM2 don't have HTMLElement and
-    //an exception is thrown and we end up here. Testing some
-    //properties that all elements have. (works on IE7)
-    return (typeof obj==="object") &&
-      (obj.nodeType===1) && (typeof obj.style === "object") &&
-      (typeof obj.ownerDocument ==="object");
+	try {return obj instanceof HTMLElement;}
+	catch(e){
+		return (typeof obj==="object") &&
+		(obj.nodeType===1) && (typeof obj.style === "object") &&
+		(typeof obj.ownerDocument ==="object");
   }
 }
 
@@ -326,15 +310,11 @@ function get_child_ids_in_id(id,text_prefix,node_type) {
 function removeRowByCellValue(table,cellValue) {
     var cells = table.getElementsByTagName("TD");
     for(var x = 0; x < cells.length; x++) {
-
         // check if cell has a childNode, prevent errors
-        if(!cells[x].firstChild) {
-            continue;
-        }
+        if(!cells[x].firstChild) continue;
         if(cells[x].firstChild.nodeValue == cellValue) {
             var row = cells[x].parentNode;
             row.parentNode.removeChild(row);
-
             break;
         }
     }

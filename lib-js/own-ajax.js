@@ -3,14 +3,15 @@
 //Macht aus allen Forms, welche die Eigenscahft class= "form_ajax" haben ein "Ajax-Form".
 //Im Erfolgsfall wird folgende Javascript-Funktion aufgerufen:
 //		form.id + "_submit"
-$(function() {
-	$(".form_ajax").submit(function(e) {
+
+function create_ajax_form(the_form) {
+		the_form.submit(function(e) {
 		loading_show(true);
-		var callback = $(this).attr('id') + "_submit";
+		var callback = the_form.attr('id') + "_submit";
 			$.ajax({
-			method: $(this).attr('method'), 
-			url: $(this).attr('action'),
-			data: $(this).serialize(), // serializes the form's elements.
+			method: the_form.attr('method'), 
+			url: the_form.attr('action'),
+			data: the_form.serialize(), // serializes the form's elements.
 			success: function(data)
 			{
 				loading_hide();
@@ -34,4 +35,8 @@ $(function() {
 
 		e.preventDefault();
 	});
+}
+
+$(function() {
+	$(".form_ajax").each(function() { create_ajax_form($(this)); } )
 });
