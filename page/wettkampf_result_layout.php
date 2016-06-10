@@ -110,7 +110,7 @@
             
 			$('#list_turner_add').append(li)
 		}
-		 dialog_create($('#div_form_wettkampf_result_add_turner')[0])
+		 dialog_create($('#div_form_wettkampf_result_add_turner')[0],null,false)
 	}
 
 	function user_import_xls_finish(json) {

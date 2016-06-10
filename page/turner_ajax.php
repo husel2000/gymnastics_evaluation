@@ -33,11 +33,11 @@ if(empty($_POST['action'])) {
 	$name = $_POST['name'];
 	$value = trim($_POST['value']);
 	if($name == "geburtsdatum" || $name == "pass_gueltig") {
-		if(strlen($value) == 10) {
-			$value = substr($value,-4) . "-" . substr($value,3,2) . "-" . substr($value,0,2) ; 
-		}
+		$sql = "UPDATE turner SET ". $name . " = str_to_date(?,'%d.%m.%Y') WHERE id_turner = ?";
+	}else {
+		$sql = "UPDATE turner SET ". $name . " = ? WHERE id_turner = ?";
 	}
-	$sql = "UPDATE turner SET ". $name . " = ? WHERE id_turner = ?";
+	
 	$res = db_select($sql,$value,$id);
 	$data = $res;	
 }elseif($_POST['action'] == "create") {

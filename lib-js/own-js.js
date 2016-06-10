@@ -22,7 +22,7 @@ function user_import_xls_import_file(file) {
 	var name = file.files[0].name;
 	reader.onload = function(e) {
 		var data = e.target.result;
-		var workbook = XLSX.raed(data, {type: 'binary'});
+		var workbook = XLSX.read(data, {type: 'binary'});
 		xls_obj_json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 		user_import_xls_ask_column();
 	};
@@ -70,7 +70,7 @@ function user_import_xls_return_json(div) {
 	
 	//Aufräumen...
 	$('.xls_import').each(function() {
-		dialog_lose(this);
+		dialog_close(this);
 	});
 	
 	xls_callback(xls_json_result);

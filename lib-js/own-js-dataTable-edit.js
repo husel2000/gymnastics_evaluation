@@ -4,9 +4,13 @@ function dataTable_edit_inline_off(ele) {
 	//Prüfen, ob schon Edit-Modus;
 	if(!$(ele).hasClass("dataTable_edit_active")) return;
 	$(ele).removeClass("dataTable_edit_active");
+	//Alter Wert
+	var oldValue = $(ele).children().prop("defaultValue");
 	//Neuen, eingegebenen Wert
 	var newValue = $(ele).children()[0].value;
 	$(ele).html(newValue);
+	if(newValue == oldValue) return;
+	
 	//Feld-Name ermitteln
 	var table = $(ele).closest('table');
 	var table_head_row = $('thead',table).children()[0];

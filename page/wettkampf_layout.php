@@ -159,7 +159,7 @@
 	function form_wettkampf_create_show() {
 		$('#form_wettkampf_create')[0].reset();
 		$("input[name=create_geraet\\[\\]").each(function() {form_wettkampf_create_geraet_change(this)});	
-		dialog_create($('#form_wettkampf_create')[0])
+		dialog_create($('#form_wettkampf_create')[0],null,false)
 	}
 	function form_wettkampf_create_submit(data) { 
 		dialog_close('#form_wettkampf_create')
