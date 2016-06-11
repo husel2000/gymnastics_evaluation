@@ -1,7 +1,10 @@
 <?php
 	//30.05.2016 - Ma.Weber - Wenn "Bereichs-Wettkampf", dann Grenzen anzeigen und veränderbar
 ?>
-<h1><span class="label label-default">Wettkampf bearbeiten</span></h1>
+<h1><span class="label label-default">Wettkampf <?php 
+			$res = db_select("Select bezeichnung from wettkampf where id_wettkampf = ?",$_GET['id_wettkampf']);
+			echo $res[0][0];
+			?> bearbeiten</span></h1>
 <script type="text/javascript">	
 	$(document).ready( function () {
 		$("#wettkampf_turner_result_table").DataTable( {
@@ -121,7 +124,7 @@
 			var vorname = "";
 			var nachname = "";
 			if(s.vorname != "") vorname = s.vorname;
-			if(s.nachname != "") vorname = s.nachname;
+			if(s.nachname != "") nachname = s.nachname;
 			
 			$('#list_turner_add > div > label').each(function() {
 				var name_list_soundex = soundex($(this).text());

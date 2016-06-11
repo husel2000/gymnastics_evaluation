@@ -6,7 +6,7 @@ function date_format_mysql_to_ger(mysql_date) {
 	dArr = mysql_date.split("-");  // ex input "2010-01-18"
 	return dArr[2]+ "." +dArr[1]+ "." +dArr[0]; //ex out: "18/01/2010"
 }
-function user_import_xls_start(arr_columns,callback) {
+function user_import_xls_start(arr_columns,callback,filter=false) {
 	xls_callback = callback; //Save Callback, Used in user_import_xls_return_json
 	user_import_xls_select_file();
 	xls_arr_columns = arr_columns;
@@ -46,6 +46,21 @@ function user_import_xls_ask_column() {
 		d.append(group);
 	});
 	
+	//Filter
+	group = $('<div/>', { class: "form-group" });
+	group.append($('<label/>', { class:"control-label col-sm-2", html: "Filter"}));
+	select = $('<select/>',{ name: "filter_spalte", size:1 });
+	select.append($('<option>', {value: "", text: "-" }))
+	for(var k in xls_obj_json[0]) {
+		select.append($('<option>', {value: k, text: k }))
+	}
+	col = $('<div/>',{ class: "col-sm-10"});
+	col.append(select);
+	group.append(col);
+	group.append($('<input>', {name: "filter_wert" }))
+	d.append(group);
+	
+	
 	d.append($('<button/>', { text:"Import", class:"btn btn-default", onclick:"user_import_xls_return_json(document.getElementsByName('user_import_xls')[0])"}));
 	dialog_create(d[0]);
 }
@@ -53,21 +68,23 @@ function user_import_xls_ask_column() {
 function user_import_xls_return_json(div) {
 	var xls_json_translate = {}; //XLS-Column --> Target-Column
 	$(div).find("select").each(function() {
-		if(this.value !== "" && this.value != "-") {
+		if(this.value !== "" && this.value != "-" && this.name != "filter_wert") {
 			xls_json_translate[this.value] = this.name;
 		}
 	});
 	
-	var xls_json_result = new Array;
+	var filter_column = $(div).find('select[name="filter_spalte"]').val();
+	var filter_wert = $(div).find('input[name="filter_wert"]').val();
+	var xls_json_result = new Array();
 	
 	xls_obj_json.forEach(function(entry) {
+		if(entry[filter_column] !== filter_wert && filter_wert !== "") return;
 		tmp = {};
 		for(var key in xls_json_translate) {
 			tmp[xls_json_translate[key]] = entry[key];
 		}
 		xls_json_result.push(tmp);
 	});
-	
 	//Aufräumen...
 	$('.xls_import').each(function() {
 		dialog_close(this);
