@@ -1,5 +1,7 @@
 <?php
 //27.05.2016 - Ma.Weber - Alter mit prüfen!
+//12.06.2016 - Ma.Weber - Auswahl der Turner über Alter begrenzen
+//						Aus Riegenliste löschen
 
 $error = False;
 $error_text = "";
@@ -22,11 +24,16 @@ if(empty($_POST['action'])) {
 		db_select($sql,$row[0]);
 		$data[] = $row[0];
 	}
+	//Auch aus Riegenlise löschen
+	$sql = "Delete From riegenliste_liste whee id_wettkampf = ? and id_turner = ?";
+	db_select($sql,$id_turner,$id_wettkampf);
 }elseif($_POST['action'] == "turner_list") {
 	$id_wettkampf = $_POST['id_wettkampf'];
-	$sql = "Select id_turner,name,vorname,verein from turner where id_turner NOT IN (".
+	$sql = "Select id_turner,name,vorname,verein from turner t1, wettkampf w1 where ".
+				"year(t1.geburtsdatum) between w1.jahrgang_max and w1.jahrgang_min and ".
+				"w1.id_wettkampf = ? and t1.id_turner NOT IN (".
 				"Select distinct id_turner From wettkampf_geraet_turner Where id_wettkampf_geraet IN (".
-				"Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = ?".
+				"Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = w1.id_wettkampf ".
 				")) ORDER BY name,vorname";
 	$res = db_select($sql,$id_wettkampf);
 	$data = Array();
@@ -70,11 +77,13 @@ if(empty($_POST['action'])) {
 }elseif($_POST['action'] == "turner_get") {
 	$id_wettkampf = $_POST['id_wettkampf'];
 	//Alle Turner in dem Wettkampf finden
-	$sql = "Select id_turner,name,vorname,verein From turner Where id_turner IN (" .
+	$sql = "Select t1.id_turner,name,vorname,verein, r1.riege_no, r1.reihenfolge From turner t1 ".
+			"LEFT JOIN riegenliste_liste r1 ON(r1.id_wettkampf = ? and r1.id_turner = t1.id_turner) " .
+			"Where t1.id_turner IN (" .
 			"Select distinct id_turner From wettkampf_geraet_turner Where id_wettkampf_geraet IN (".
 			"Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = ?".
 			"))";
-	$res = db_select($sql,$id_wettkampf);
+	$res = db_select($sql,$id_wettkampf,$id_wettkampf);
 	$data = Array();
 	foreach($res As $row) {
 		$turner = Array();
@@ -82,9 +91,10 @@ if(empty($_POST['action'])) {
 		$turner['name'] = $row[1];
 		$turner['vorname'] = $row[2];
 		$turner['verein'] = $row[3];
+		$turner['riege_no'] = $row[4];
+		$turner['riege_reihenfolge'] = $row[5];
 		$turner['geraet'] = Array();
-		$sql = "Select id_wettkampf_geraet_turner,id_wettkampf_geraet,wert_ausgang,wert_abzug From wettkampf_geraet_turner " .
-				"Where id_turner = ?";
+		$sql = "Select id_wettkampf_geraet_turner,id_wettkampf_geraet,wert_ausgang,wert_abzug From wettkampf_geraet_turner where id_turner = ?";
 		$res2 = db_select($sql,$row[0]);
 		foreach ($res2 As $row) {
 			$geraet = Array();

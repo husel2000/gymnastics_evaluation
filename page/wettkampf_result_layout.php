@@ -63,7 +63,8 @@
 		
 		for(var i = 0; i < data.length; i++) {		
 			var arr_col = new Array(data[i].geraet.length + 1);
-			arr_col[0] = data[i].name + ", " + data[i].vorname;
+			arr_col[0] = data[i].name + ", " + data[i].vorname + "<div>" + data[i].verein + "</div>";
+			arr_col[1] = "<span style='display:none'>Riege</span>" + data[i].riege_no + "-"+data[i].riege_reihenfolge
 			
 			for(var j = 0; j < data[i].geraet.length; j++) {
 				var div = $('<div />');
@@ -92,7 +93,7 @@
 		    		value: data[i].geraet[j].wert_ausgang - data[i].geraet[j].wert_abzug
 				}));
 
-				arr_col[j+1] = div.html()
+				arr_col[j+2] = div.html()
 			}
 			//"Delete-Button" anlegen - CSS-Class button_delete ui-button
 			var div = $('<div />').append($('<button/>', {
@@ -100,7 +101,7 @@
 	    		class: 'button_delete ui-button',
 	    		onclick: "turner_delete(" + data[i].id_turner + ")"
 			}));
-			arr_col[data[i].geraet.length+1]  = div.html(); 		
+			arr_col[data[i].geraet.length+2]  = div.html(); 		
 			t.row.add(arr_col).draw();
 		}
 		css_design_button();		
@@ -199,7 +200,7 @@
 <table class="row-border" id="wettkampf_turner_result_table">
 	<thead>
 		<tr>
-			<td>Turner</td>
+			<td>Turner</td><td>Riege</td>
 			<?php 
 			$res = db_select("Select id_wettkampf_geraet, bezeichnung from wettkampf_geraet where id_wettkampf = ? order by reihenfolge",$_GET['id_wettkampf']);
 			foreach($res As $row) {
