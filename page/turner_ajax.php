@@ -48,8 +48,15 @@ if(empty($_POST['action'])) {
 	$pass = trim($_POST['pass']);
 	$pass_gueltig = trim($_POST['pass_gueltig']);
 	
-	$sql = "INSERT INTO turner(name,vorname,verein,geburtsdatum,pass,pass_gueltig) VALUES(?,?,?,STR_TO_DATE(?,'%d.%m.%Y'),?,STR_TO_DATE(?,'%d.%m.%Y'))";
-	$res = db_select($sql,$name,$vorname,$verein,$geburtsdatum,$pass,$pass_gueltig);
-	$data = get_turner_by_id($res);
+	if($name == "" || $vorname == "") {
+		$error = true;
+		$error_text = "Vorname / Nachname fehlt!";
+	}
+	
+	if($error == false) {
+		$sql = "INSERT INTO turner(name,vorname,verein,geburtsdatum,pass,pass_gueltig) VALUES(?,?,?,STR_TO_DATE(?,'%d.%m.%Y'),?,STR_TO_DATE(?,'%d.%m.%Y'))";
+		$res = db_select($sql,$name,$vorname,$verein,$geburtsdatum,$pass,$pass_gueltig);
+		$data = get_turner_by_id($res);
+	}
 }
 ?>

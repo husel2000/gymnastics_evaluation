@@ -71,10 +71,24 @@
 			$('#create_nachname').val(ele.nachname);
 			$('#create_vorname').val(ele.vorname);
 			$('#create_verein').val(ele.verein);
-			if(typeof(ele.geburtsdatu) != "undefined") {
-				if(ele.geburtsdatum.match(/..\/..\/..../)) {
-					ele.geburtsdatum = ele.geburtsdatum.replace(/\//g,".");
-				} 
+			if(typeof(ele.geburtsdatum) !== "undefined") {
+				if(ele.geburtsdatum.match(/[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4}/)) {
+					var arr = ele.geburtsdatum.split("/"); 
+					if(arr[0].length == 1) arr[0] = "0" + arr[0]
+					if(arr[1].length == 1) arr[1] = "0" + arr[1]
+					if(arr[2].length == 2) arr[2] = "20" + arr[2]
+					ele.geburtsdatum = arr[1] + "." + arr[0] + "." + arr[2]
+				}else if(ele.geburtsdatum.match(/[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{2,4}/)) {
+					var arr = ele.geburtsdatum.split("/"); 
+					if(arr[0].length == 1) arr[0] = "0" + arr[0]
+					if(arr[1].length == 1) arr[1] = "0" + arr[1]
+					if(arr[2].length == 2) arr[2] = "20" + arr[2]
+					ele.geburtsdatum = arr[0] + "." + arr[1] + "." + arr[2]
+				}else {
+					dialog_create("Geburtsdatum für Turner " + ele.vorname + " " + ele.nachname + " ungültig")
+					return;
+				}
+				
 			}
 			$('#create_geburtsdatum').val(ele.geburtsdatum);
 			$('#create_pass').val(ele.pass);
