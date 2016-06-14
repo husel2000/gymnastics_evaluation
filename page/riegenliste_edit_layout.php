@@ -1,4 +1,6 @@
 <?php
+	//14.06.2016 - Ma.Weber - RiegeNo farblich hervorheben
+
 	$res = db_select("Select riegentext From riegenliste where id_riegenliste = ?",$_GET['id_riegenliste']);
 	$riegentext = $res[0][0];
 ?>
@@ -109,6 +111,13 @@ function form_riegenliste_get_submit(data) {
 		});
 	}
 	
+	$('#table_riegenliste > tbody  > tr').each(function(i,obj) {
+		$(obj).removeClass("odd even");
+		
+		if($(obj).find("td:first").text() % 2 == 1) 
+			$(obj).find("td:first").addClass("row_odd");
+	});
+	
 	//Highlight bei Änderung
 	if($("#form_pos_switch > input[name='id_riegenliste_liste']").val() != "") {
 		tr = $('#' + $("#form_pos_switch > input[name='id_riegenliste_liste']").val())
@@ -118,8 +127,8 @@ function form_riegenliste_get_submit(data) {
 	
 	if(typeof(tr) != "undefined") {
 		classes = tr.attr("class");
-		tr.removeClass("odd even");
-		tr.effect("highlight", {}, 1500,function(){ tr.addClass(classes);  }) ;
+		
+		tr.effect("highlight", {}, 3000,function(){ tr.addClass(classes);  }) ;
 	}
 }
 

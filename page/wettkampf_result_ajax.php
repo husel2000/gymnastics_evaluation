@@ -25,12 +25,12 @@ if(empty($_POST['action'])) {
 		$data[] = $row[0];
 	}
 	//Auch aus Riegenlise löschen
-	$sql = "Delete From riegenliste_liste whee id_wettkampf = ? and id_turner = ?";
+	$sql = "Delete From riegenliste_liste where id_wettkampf = ? and id_turner = ?";
 	db_select($sql,$id_turner,$id_wettkampf);
 }elseif($_POST['action'] == "turner_list") {
 	$id_wettkampf = $_POST['id_wettkampf'];
 	$sql = "Select id_turner,name,vorname,verein from turner t1, wettkampf w1 where ".
-				"year(t1.geburtsdatum) between w1.jahrgang_max and w1.jahrgang_min and ".
+				"year(t1.geburtsdatum) between w1.jahrgang_max and w1.jahrgang_min and (t1.geschlecht = w1.geschlecht or w1.geschlecht is null) and ".
 				"w1.id_wettkampf = ? and t1.id_turner NOT IN (".
 				"Select distinct id_turner From wettkampf_geraet_turner Where id_wettkampf_geraet IN (".
 				"Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = w1.id_wettkampf ".
@@ -48,15 +48,16 @@ if(empty($_POST['action'])) {
 	db_select($sql,$ausgang,$abzug,$id);
 }elseif($_POST['action'] == "turner_add") {
 	$id_wettkampf = $_POST['id_wettkampf'];
-	//Alters-Grenze für Wettkampf suchen und alle prüfen!
-	$res = db_select("Select jahrgang_min, jahrgang_max From wettkampf where id_wettkampf = ?",$id_wettkampf);
+	//Alters-Grenze & Geschlecht für Wettkampf suchen und alle prüfen!
+	$res = db_select("Select jahrgang_min, jahrgang_max, geschlecht From wettkampf where id_wettkampf = ?",$id_wettkampf);
 	$jahrgang_min = $res[0][0];
 	$jahrgang_max = $res[0][1];
+	$geschlecht = $res[0][2];
 	foreach($_POST['turner'] As $id_turner) {
-		$res = db_select("Select YEAR(geburtsdatum),name,vorname from turner WHERE id_turner = ?",$id_turner);
-		if($res[0][0] < $jahrgang_max || $res[0][0] > $jahrgang_min) {
+		$res = db_select("Select YEAR(geburtsdatum),name,vorname,geschlecht from turner WHERE id_turner = ?",$id_turner);
+		if($res[0][0] < $jahrgang_max || $res[0][0] > $jahrgang_min || ($geschlecht != $res[0][3])) {
 			$error = true;
-			$error_text .= "Für Wettkampf Jahrgang " . $jahrgang_min . " - " . $jahrgang_max . " ist Turnerin " . $res[0][2] . " " . $res[0][1] . " (" . $res[0][0] . ") nicht zugelassen!";
+			$error_text .= "Für Wettkampf Geschlecht $geschlect, Jahrgang " . $jahrgang_min . " - " . $jahrgang_max . " ist Turnerin " . $res[0][2] . " " . $res[0][1] . " (" . $res[0][3] ." - " .$res[0][0] . ") nicht zugelassen!";
 			return;
 		}
 	}

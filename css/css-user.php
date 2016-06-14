@@ -124,4 +124,6 @@ require_once("../config.php");
 	width:50%;
 }
 
-
+.row_odd {
+	background-color:#ffcc99
+}

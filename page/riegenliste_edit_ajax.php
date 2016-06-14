@@ -42,7 +42,7 @@ if(empty($_POST['action'])) {
 }elseif($_POST['action'] == "initial") {
 	$id_riegenliste = $_POST['id_riegenliste'];
 	$anz_riegen = $_POST['anzahl_riegen'];
-	if($anz_riegen < 2) {
+	if($anz_riegen < 1) {
 		$error = True;
 		$error_text = "Riegenlisten können nur für min. 1 Riegen erstellt werden!";
 		return;

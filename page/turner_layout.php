@@ -43,6 +43,7 @@
 		t.row.add( [	dataRow.id_turner,
 		    			dataRow.name,
 		    			dataRow.vorname,
+		    			dataRow.geschlecht,
 		    			dataRow.verein,
 		    			dataRow.geburtsdatum,
 		    			dataRow.pass,
@@ -60,7 +61,7 @@
 	}
 
 	function form_turner_edit_value_submit(data) {
-		if(data != true) {
+		if(data != "1") {
 			dialog_create("Ups! Es ging etwas schief. Bitte Seite neu laden!");
 		}
 	}
@@ -68,9 +69,10 @@
 	function user_import_xls_finish(json_data) {
 		json_data.forEach(function(ele) {
 			$('#form_turner_create')[0].reset();
-			$('#create_nachname').val(ele.nachname);
-			$('#create_vorname').val(ele.vorname);
-			$('#create_verein').val(ele.verein);
+			$('#form_turner_create').find("[name='nachname']").val(ele.nachname)
+			$('#form_turner_create').find("[name='vorname']").val(ele.vorname)
+			$('#form_turner_create').find("[name='verein']").val(ele.verein)
+			$('#form_turner_create').find("[name='geschlecht']").val(ele.geschlecht)
 			if(typeof(ele.geburtsdatum) !== "undefined") {
 				if(ele.geburtsdatum.match(/[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4}/)) {
 					var arr = ele.geburtsdatum.split("/"); 
@@ -79,7 +81,7 @@
 					if(arr[2].length == 2) arr[2] = "20" + arr[2]
 					ele.geburtsdatum = arr[1] + "." + arr[0] + "." + arr[2]
 				}else if(ele.geburtsdatum.match(/[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{2,4}/)) {
-					var arr = ele.geburtsdatum.split("/"); 
+					var arr = ele.geburtsdatum.split("."); 
 					if(arr[0].length == 1) arr[0] = "0" + arr[0]
 					if(arr[1].length == 1) arr[1] = "0" + arr[1]
 					if(arr[2].length == 2) arr[2] = "20" + arr[2]
@@ -90,9 +92,10 @@
 				}
 				
 			}
-			$('#create_geburtsdatum').val(ele.geburtsdatum);
-			$('#create_pass').val(ele.pass);
-			$('#create_pass_gueltig').val(ele.pass_gueltig);
+			$('#form_turner_create').find("[name='geburtsdatum']").val(ele.geburtsdatum)
+			$('#form_turner_create').find("[name='pass']").val(ele.pass)
+			$('#form_turner_create').find("[name='pass_gueltig']").val(ele.pass_gueltig)
+			
 			turner_create_precheck();
 		});
 	}
@@ -129,6 +132,16 @@
 				<input type="text" class="form-control" id="create_vorname" name="vorname" placeholder="Vorname">
 			</div>
 		</div>
+		<div class="form-group" >
+			<label class = "control-label col-sm-2">Geschlecht</label>
+			<div class="col-sm-10">
+				<select class="form-control" name="geschlecht">
+					<option value="">Auswählen</option>
+	    			<option value="m">männlich</option>
+	    			<option value="w">weiblich</option>
+	  			</select>
+			</div>
+		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="create_verein">Verein</label>
 			<div class="col-sm-10">
@@ -163,13 +176,14 @@
 <!-- Start -->
 <h1><span class="label label-default">Turner</span></h1>
 <button type="button" class="btn btn-default" onclick="form_turner_create_show()">Neuen Turner anlegen</button>
-<button type="button" class="btn btn-default" onclick="user_import_xls_start(['nachname','vorname','verein','geburtsdatum','pass','pass_gueltig'],user_import_xls_finish)">Import</button>
+<button type="button" class="btn btn-default" onclick="user_import_xls_start(['nachname','vorname','geschlecht','verein','geburtsdatum','pass','pass_gueltig'],user_import_xls_finish)">Import</button>
 <table data-formid="form_turner_edit_value" class="table_data_edit" id="turner_table_list">
 	<thead>
 		<tr>
 			<td>ID</td>
 			<td data-form-fieldname="name">Name</td>
 			<td data-form-fieldname="vorname">Vorname</td>
+			<td data-form-fieldname="geschlecht">Geschlecht</td>
 			<td data-form-fieldname="verein">Verein</td>
 			<td data-form-fieldname="geburtsdatum">Jahrgang</td>
 			<td data-form-fieldname="pass">Pass Nr.</td>

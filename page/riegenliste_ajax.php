@@ -39,5 +39,13 @@ if(empty($_POST['action'])) {
 	foreach($res As $row) {
 		$data[] = Array("id_riegenliste"=>$row[0],"bezeichnung"=>$row[1]);
 	}
+}elseif($_POST['action'] == "riege_delete") {
+	$sql = "Delete FROM riegenliste_liste where id_riegenliste =?";
+	$res = db_select($sql,$_POST['id_riegenliste']);
+	$sql = "Delete FROM riegenliste_wettkampf where id_riegenliste =?";
+	$res = db_select($sql,$_POST['id_riegenliste']);
+	$sql = "Delete FROM riegenliste where id_riegenliste =?";
+	$res = db_select($sql,$_POST['id_riegenliste']);
+	$data = $_POST['id_riegenliste'];
 }
 ?>

@@ -13,6 +13,7 @@
 		form_dom.find('input[name="create_name"]').val(data.bezeichnung);
 		form_dom.find('input[name="create_jahrgang_min"]').val(data.jahrgang_min);
 		form_dom.find('input[name="create_jahrgang_max"]').val(data.jahrgang_max);
+		form_dom.find('select[name="create_geschlecht"]').val(data.geschlecht);
 		form_dom.find('select[name="create_typ"]').val(data.typ);
 		form_dom.find('select[name="create_typ"]').attr("disabled",true);
 		form_dom.find('#form_wettkampf_create_geraet_parent').closest('div[class="form-group"]').hide()
@@ -211,8 +212,6 @@
     		}));
     		
 			t.row.add( [data[i].datum,data[i].bezeichnung,div.html()] ).draw();
-
-		
 		}
 		css_design_button();
 	}
@@ -246,7 +245,17 @@
 			<div class="col-sm-10">
 				<input type="number" min="1900" value="2001" class="form-control" name="create_jahrgang_max">
 			</div>
-		</div>		
+		</div>	
+		<div class="form-group" >
+			<label class = "control-label col-sm-2">Typ</label>
+			<div class="col-sm-10">
+				<select class="form-control" name="create_geschlecht">
+					<option value="">Gemischt</option>
+	    			<option value="m">männlich</option>
+	    			<option value="w">weiblich</option>
+	  			</select>
+			</div>
+		</div>
 		<div class="form-group" >
 			<label class = "control-label col-sm-2">Typ</label>
 			<div class="col-sm-10">

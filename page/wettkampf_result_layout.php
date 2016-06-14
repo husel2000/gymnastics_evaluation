@@ -2,8 +2,11 @@
 	//30.05.2016 - Ma.Weber - Wenn "Bereichs-Wettkampf", dann Grenzen anzeigen und veränderbar
 ?>
 <h1><span class="label label-default">Wettkampf <?php 
-			$res = db_select("Select bezeichnung from wettkampf where id_wettkampf = ?",$_GET['id_wettkampf']);
+			$res = db_select("Select bezeichnung,geschlecht from wettkampf where id_wettkampf = ?",$_GET['id_wettkampf']);
 			echo $res[0][0];
+			if($res[0][1] == "m") echo " (männlich)";
+			elseif($res[0][1] == "w") echo " (weiblich)";
+			else echo " (gemischt)";
 			?> bearbeiten</span></h1>
 <script type="text/javascript">	
 	$(document).ready( function () {
@@ -130,8 +133,6 @@
 			$('#list_turner_add > div > label').each(function() {
 				var name_list_soundex = soundex($(this).text());
 				var name_xls_soundex = soundex(nachname + ", " + vorname);
-				//console.log("Liste: " + $(this).text() + " - " + name_list_soundex);
-				//console.log("XLS: " + s.nachname + ", " + s.vorname + " - " + name_xls_soundex);
 				if(name_xls_soundex == name_list_soundex) {
 					$(this).children("input[type='checkbox']").prop('checked',true);
 					found = true;
