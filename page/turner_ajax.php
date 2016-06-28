@@ -50,7 +50,7 @@ if(empty($_POST['action'])) {
 	$res = db_select($sql,$value,$id);
 	$data = $res;	
 }elseif($_POST['action'] == "create") {
-	$name = trim($_POST['name']);
+	$name = trim($_POST['nachname']);
 	$vorname = trim($_POST['vorname']);
 	$verein = trim($_POST['verein']);
 	$geburtsdatum = trim($_POST['geburtsdatum']);

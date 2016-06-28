@@ -1,13 +1,28 @@
 <?php
 	//30.05.2016 - Ma.Weber - Wenn "Bereichs-Wettkampf", dann Grenzen anzeigen und veränderbar
+	//28.06.2016 - Ma.Weber - Umgestellt, auch für "Riegenlisten" möglich
+	
+	$id_wettkampf = "";
+	if(!empty($_GET['id_wettkampf']))$id_wettkampf = $_GET['id_wettkampf'];
+	$id_riegenliste = "";
+	if(!empty($_GET['id_riegenliste']))$id_riegenliste = $_GET['id_riegenliste'];
 ?>
-<h1><span class="label label-default">Wettkampf <?php 
-			$res = db_select("Select bezeichnung,geschlecht from wettkampf where id_wettkampf = ?",$_GET['id_wettkampf']);
-			echo $res[0][0];
-			if($res[0][1] == "m") echo " (männlich)";
-			elseif($res[0][1] == "w") echo " (weiblich)";
-			else echo " (gemischt)";
-			?> bearbeiten</span></h1>
+
+<h1><span class="label label-default">
+<?php 
+	$is_riegenliste = false;
+	if(!empty($id_wettkampf)) {
+		$res = db_select("Select bezeichnung,geschlecht from wettkampf where id_wettkampf = ?",$id_wettkampf);
+		echo "Wettkampf " . $res[0][0];
+		if($res[0][1] == "m") echo " (männlich)"; elseif($res[0][1] == "w") echo " (weiblich)"; else echo " (gemischt)";
+	}elseif(!empty($id_riegenliste)) {
+		$res = db_select("Select riegentext from riegenliste where id_riegenliste = ?",$id_riegenliste);
+		echo "Riegenliste " . $res[0][0];
+		$is_riegenliste = true;
+	}
+?>
+
+</span></h1>
 <script type="text/javascript">	
 	$(document).ready( function () {
 		$("#wettkampf_turner_result_table").DataTable( {
@@ -155,7 +170,8 @@
 <div style="display:none">
 	<form class="form_ajax" id="form_wettkampf_result_reload" action="<?php echo Nav::_link_create_ajax(Nav::_get_akt()) ?>" method="POST">
 		<input type="hidden" name="action" value="turner_get">
-		<input type="hidden" name="id_wettkampf" value="<?php echo $_GET['id_wettkampf'];?>">
+		<input type="hidden" name="id_wettkampf" value="<?php echo $id_wettkampf;?>">
+		<input type="hidden" name="id_riegenliste" value="<?php echo $id_riegenliste;?>">
 	</form>
 </div>
 <!-- Turner löschen -->
@@ -163,14 +179,14 @@
 	<form class="form_ajax" id="form_wettkampf_turner_delete" action="<?php echo Nav::_link_create_ajax(Nav::_get_akt()) ?>" method="POST">
 		<input type="hidden" name="action" value="turner_delete">
 		<input type="hidden" name="id_turner" value="">
-		<input type="hidden" name="id_wettkampf" value="<?php echo $_GET['id_wettkampf'];?>">
+		<input type="hidden" name="id_wettkampf" value="<?php echo $id_wettkampf;?>">
 	</form>
 </div>
 <!-- Mögliche Turner für Wettkampf laden -->
 <div style="display:none">
 	<form class="form_ajax" id="form_turner_list" action="<?php echo Nav::_link_create_ajax(Nav::_get_akt()) ?>" method="POST">
 		<input type="hidden" name="action" value="turner_list">
-		<input type="hidden" name="id_wettkampf" value="<?php echo $_GET['id_wettkampf'];?>">
+		<input type="hidden" name="id_wettkampf" value="<?php echo $id_wettkampf;?>">
 	</form>
 </div>
 <!-- Ergebnis senden -->
@@ -187,7 +203,7 @@
 	<div id="div_form_wettkampf_result_add_turner">
 		<form class="form-horizontal form_ajax" id="form_wettkampf_result_add_turner" role="form" action="<?php echo Nav::_link_create_ajax(Nav::_get_akt()) ?>" method="POST">
 			<input type="hidden" name="action" value="turner_add">
-			<input type="hidden" name="id_wettkampf" value="<?php echo $_GET['id_wettkampf']?>">
+			<input type="hidden" name="id_wettkampf" value="<?php echo $id_wettkampf?>">
 			<input type="text" class="form-control" id="turner_search" placeholder="Suche" onkeyup="content_filter('list_turner_add',this.value)">
 			<div id="list_turner_add" style="width:100%;height:300px;overflow-y: scroll;"></div>
 	      	<button type="submit" class="btn btn-default">Hinzufügen</button>
@@ -196,16 +212,27 @@
 	</div>
 </div>
 
+<?php //28.06.2016 - Ma.Weber
+	if(!$is_riegenliste) { ?>
 <button type="button" class="btn btn-default" onclick="(function(){$('#form_turner_list').submit() })()">Turner hinzufügen</button>
-
+<?php } ?>
 <table class="row-border" id="wettkampf_turner_result_table">
 	<thead>
 		<tr>
 			<td>Turner</td><td>Riege</td>
 			<?php 
-			$res = db_select("Select id_wettkampf_geraet, bezeichnung from wettkampf_geraet where id_wettkampf = ? order by reihenfolge",$_GET['id_wettkampf']);
-			foreach($res As $row) {
-				echo "<td>" . $row[1] . " (Ausgang - Abzug - Ergebnis)</td>\r\n";
+			if(!$is_riegenliste) {
+				$res = db_select("Select bezeichnung from wettkampf_geraet where id_wettkampf = ? order by reihenfolge",$id_wettkampf);
+				foreach($res As $row) {
+					echo "<td>" . $row[0] . " (Ausgang - Abzug - Ergebnis)</td>\r\n";
+				}
+			}elseif($is_riegenliste) {
+				//Alle Wettkämpfe...
+				$res = db_select("Select id_wettkampf from riegenliste_wettkampf where id_riegenliste = ?",$id_riegenliste);
+				$geraete = db_select("Select bezeichnung From wettkampf_geraet where id_wettkampf = ? Order by reihenfolge",$res[0][0]);
+				foreach($geraete As $geraet) {
+					echo "<td>" . $geraet[0] . " (Ausgang - Abzug - Ergebnis)</td>\r\n";
+				}
 			}
 			?>
 			<td>Aktion</td>

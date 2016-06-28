@@ -2,6 +2,7 @@
 //27.05.2016 - Ma.Weber - Alter mit prüfen!
 //12.06.2016 - Ma.Weber - Auswahl der Turner über Alter begrenzen
 //						Aus Riegenliste löschen
+//28.06.2016 - Ma.Weber - Umgestellt, auch für "Riegenlisten" möglich
 
 $error = False;
 $error_text = "";
@@ -26,7 +27,7 @@ if(empty($_POST['action'])) {
 	}
 	//Auch aus Riegenlise löschen
 	$sql = "Delete From riegenliste_liste where id_wettkampf = ? and id_turner = ?";
-	db_select($sql,$id_turner,$id_wettkampf);
+	db_select($sql,$id_wettkampf,$id_turner);
 }elseif($_POST['action'] == "turner_list") {
 	$id_wettkampf = $_POST['id_wettkampf'];
 	$sql = "Select id_turner,name,vorname,verein from turner t1, wettkampf w1 where ".
@@ -77,35 +78,73 @@ if(empty($_POST['action'])) {
 	}
 }elseif($_POST['action'] == "turner_get") {
 	$id_wettkampf = $_POST['id_wettkampf'];
-	//Alle Turner in dem Wettkampf finden
-	$sql = "Select t1.id_turner,name,vorname,verein, r1.riege_no, r1.reihenfolge From turner t1 ".
+	$id_riegenliste = $_POST['id_riegenliste'];
+	$id_wettkaempfe = Array();
+	$sql_turner = "Select t1.id_turner,name,vorname,verein, r1.riege_no, r1.reihenfolge From turner t1 ".
 			"LEFT JOIN riegenliste_liste r1 ON(r1.id_wettkampf = ? and r1.id_turner = t1.id_turner) " .
 			"Where t1.id_turner IN (" .
 			"Select distinct id_turner From wettkampf_geraet_turner Where id_wettkampf_geraet IN (".
 			"Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = ?".
 			"))";
-	$res = db_select($sql,$id_wettkampf,$id_wettkampf);
-	$data = Array();
-	foreach($res As $row) {
-		$turner = Array();
-		$turner['id_turner'] = $row[0];
-		$turner['name'] = $row[1];
-		$turner['vorname'] = $row[2];
-		$turner['verein'] = $row[3];
-		$turner['riege_no'] = $row[4];
-		$turner['riege_reihenfolge'] = $row[5];
-		$turner['geraet'] = Array();
-		$sql = "Select id_wettkampf_geraet_turner,id_wettkampf_geraet,wert_ausgang,wert_abzug From wettkampf_geraet_turner where id_turner = ?";
-		$res2 = db_select($sql,$row[0]);
-		foreach ($res2 As $row) {
-			$geraet = Array();
-			$geraet['id_wettkampf_geraet_turner'] = $row[0];
-			$geraet['id_wettkampf_geraet'] = $row[1];
-			$geraet['wert_ausgang'] = $row[2];
-			$geraet['wert_abzug'] = $row[3];
-			$turner['geraet'][] = $geraet;
+	$sql_turner_geraet = "Select id_wettkampf_geraet_turner,id_wettkampf_geraet,wert_ausgang,wert_abzug From wettkampf_geraet_turner where id_turner = ? and id_wettkampf_geraet in ".
+			"(Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = ?)";
+	
+	//28.06.2016 - Ma.Weber
+	if(!empty($id_riegenliste)) {
+		//Alle Wettkämpfe...
+		$wettkaempfe = db_select("Select id_wettkampf from riegenliste_wettkampf where id_riegenliste = ?",$id_riegenliste);
+		foreach($wettkaempfe As $akt_id_wettkampf) {
+			$id_wettkampfe[] = $akt_id_wettkampf[0];
 		}
-		$data[] = $turner;
+		//... Geräte vergleichen
+		$geraet = Array();
+		foreach($id_wettkampfe As $wett) {
+			$akt = db_select("Select bezeichnung From wettkampf_geraet where id_wettkampf = ? Order by reihenfolge",$wett);
+			$new = Array();
+			for($i = 0; $i < sizeof($akt);$i++) $new[] = $akt[$i][0];
+			$geraet[$wett] = $new;
+		}
+		
+		$key_master = "";
+		foreach($geraet As $key => $arr) {
+			if(empty($key_master)) $key_master = $key;
+			if($geraet[$key] !== $geraet[$key_master]) {
+				$error = true; $error_text = "Für diese Riege können keine Ergebnisse zusammen erfasst werden.";
+				$wettkampf_bez = db_select("Select bezeichnung from wettkampf where id_wettkampf = ?",$key)[0][0];
+				$wettkampf_bez2= db_select("Select bezeichnung from wettkampf where id_wettkampf = ?",$key_master)[0][0];
+				$error_text .= " $wettkampf_bez - $wettkampf_bez2";
+				return;
+			}
+		}
+				
+	}elseif(!empty($id_wettkampf)) {
+		$id_wettkampfe[] = $id_wettkampf;
+	}
+	
+	$data = Array();
+	foreach($id_wettkampfe As $id_wettkampf) { 
+		$turner = db_select($sql_turner,$id_wettkampf,$id_wettkampf);
+		foreach($turner As $row) {
+			$turner = Array();
+			$turner['id_turner'] = $row[0];
+			$turner['name'] = $row[1];
+			$turner['vorname'] = $row[2];
+			$turner['verein'] = $row[3];
+			$turner['riege_no'] = str_pad($row[4], 2, '0', STR_PAD_LEFT);
+			$turner['riege_reihenfolge'] = str_pad($row[5], 2, '0', STR_PAD_LEFT);
+			$turner['geraet'] = Array();
+			$sql = 
+			$res2 = db_select($sql_turner_geraet,$row[0],$id_wettkampf);
+			foreach ($res2 As $row) {
+				$geraet = Array();
+				$geraet['id_wettkampf_geraet_turner'] = $row[0];
+				$geraet['id_wettkampf_geraet'] = $row[1];
+				$geraet['wert_ausgang'] = $row[2];
+				$geraet['wert_abzug'] = $row[3];
+				$turner['geraet'][] = $geraet;
+			}
+			$data[] = $turner;
+		}
 	}
 }
 ?>

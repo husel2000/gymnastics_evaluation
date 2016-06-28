@@ -123,7 +123,7 @@
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="create_nachname">Nachname</label>
 			<div class="col-sm-10">
-				<input type="text" class="form-control" id="create_nachname" name="name" placeholder="Nachname">
+				<input type="text" class="form-control" id="create_nachname" name="nachname" placeholder="Nachname">
 			</div>
 		</div>
 		<div class="form-group">
@@ -177,7 +177,7 @@
 <h1><span class="label label-default">Turner</span></h1>
 <button type="button" class="btn btn-default" onclick="form_turner_create_show()">Neuen Turner anlegen</button>
 <button type="button" class="btn btn-default" onclick="user_import_xls_start(['nachname','vorname','geschlecht','verein','geburtsdatum','pass','pass_gueltig'],user_import_xls_finish)">Import</button>
-<table data-formid="form_turner_edit_value" class="table_data_edit" id="turner_table_list">
+<table data-formid="form_turner_edit_value" class="table_data_edit" id="turner_table_list" data-paging="true">
 	<thead>
 		<tr>
 			<td>ID</td>

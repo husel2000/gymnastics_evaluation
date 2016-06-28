@@ -9,6 +9,7 @@ if(empty($_POST['action'])) {
 	return;
 }elseif($_POST['action'] == "plausi") {
 	$id_riegenliste = $_POST['id_riegenliste'];
+	//Fehlende Turner suchen
 	$res = db_select("Select distinct a.id_turner,b.id_wettkampf from wettkampf_geraet_turner a, wettkampf_geraet b Where
 		a.id_wettkampf_geraet = b.id_wettkampf_geraet and b.id_wettkampf IN (Select id_wettkampf From riegenliste_wettkampf Where id_riegenliste = ?)
 		and a.id_turner NOT IN (Select id_turner FROM riegenliste_liste Where id_riegenliste = ?)",$id_riegenliste,$id_riegenliste);
@@ -17,7 +18,7 @@ if(empty($_POST['action'])) {
 	$res2 = db_select("Select max(riege_no)+1 From riegenliste_liste where id_riegenliste = ?",$id_riegenliste);
 	$riege_no = $res2[0][0];
 	for($i = 0; $i < sizeof($res); $i++) {
-		db_select("INSERT INTO riegenliste_liste(id_riegenliste,riege_no,reihenfolge,id_turner,id_wettkampf) VALUES(?,?,?,?,?)",$id_riegenliste,$riege_no,$i+1,$res[0][0],$res[0][1]);
+		db_select("INSERT INTO riegenliste_liste(id_riegenliste,riege_no,reihenfolge,id_turner,id_wettkampf) VALUES(?,?,?,?,?)",$id_riegenliste,$riege_no,$i+1,$res[$i][0],$res[$i][1]);
 	}
 	
 }elseif($_POST['action'] == "get") {
@@ -56,7 +57,7 @@ if(empty($_POST['action'])) {
 		and	  e.id_wettkampf = a.id_wettkampf
 		and   e.id_wettkampf_geraet = d.id_wettkampf_geraet
 		and   b.id_turner = d.id_turner 
-		and   c.id_riegenliste = ? ORDER BY a.id_wettkampf, b.verein, b.name, b.vorname",$id_riegenliste);
+		and   c.id_riegenliste = ? ORDER BY b.verein, b.name, b.vorname",$id_riegenliste);
 	$arr_all = Array();
 	foreach($arr_res As $akt) {
 		$arr_all[] = Array("id_wettkampf"=>$akt[0], "id_turner"=>$akt[1]);
@@ -92,11 +93,14 @@ if(empty($_POST['action'])) {
 	$riege = $_POST['riege'];
 	if(empty($id_riegenliste_liste) ) {	$error = True; $error_text = "id_riegenliste_liste Fehlt - Interner Fehler"; return; }
 	if(!is_numeric($riege) || empty($riege)) {	$error = True; $error_text = "Neue Riege $riege ungültig"; return; }
+	//id_Riegenliste ermitteln
+	$res = db_select("Select id_riegenliste from riegenliste_liste where id_riegenliste_liste = ?",$id_riegenliste_liste);
+	$id_riegenliste = $res[0][0];
 	//Alte Riege - Nummerierung anpassen
 	$res = db_select("Select riege_no,reihenfolge from riegenliste_liste where id_riegenliste_liste = ?",$id_riegenliste_liste);
-	db_select("Update riegenliste_liste Set reihenfolge = reihenfolge-1 Where riege_no = ? and reihenfolge > ?",$res[0][0],$res[0][1]);
+	db_select("Update riegenliste_liste Set reihenfolge = reihenfolge-1 Where riege_no = ? and reihenfolge > ? and id_riegenliste = ?",$res[0][0],$res[0][1],$id_riegenliste);
 	//Datensatz korrigieren
-	$res = db_select("Select max(reihenfolge)+1 from riegenliste_liste where riege_no = ?",$riege);
+	$res = db_select("Select max(reihenfolge)+1 from riegenliste_liste where riege_no = ? and id_riegenliste = ?",$riege,$id_riegenliste);
 	$reihenfolge = $res[0][0]; if($reihenfolge == "") $reihenfolge = 1;
 	db_select("UPDATE riegenliste_liste SET 
 		reihenfolge = ?, riege_no = ? 

@@ -45,17 +45,20 @@ function dataTable_edit_inline_on(ele) {
 
 function dataTable_edit_init() {
 	// On-Click TD, make Input Textbox
-	$(".table_data_edit").DataTable( {
+	$(".table_data_edit").each(function(index,ele) {
+		var arr = {
 			paging: false,
 			dom: 'Bfrtip',
 			buttons: [ 'csv', 'excel' ],
 			"aaSorting": [],
 			"createdRow": function ( row, data, index ) {
 				$('td',row).eq(0).hide();
-				
 				$('td',row).click(function (e) { dataTable_edit_inline_on(this)} );
 			}
-		});
+		}
+		if($(ele).attr("data-paging") == "true") { arr['paging'] = true; arr['pageLength'] = 10; }
+		$(ele).DataTable(arr);
+	});
 	$('.table_data_edit tbody td').click(function (e) { dataTable_edit_inline_on(this)} );
 	$('.table_data_edit thead td:first').hide()
 }

@@ -2,6 +2,21 @@ function dialog_close(ele) {
 	$(ele).closest(".popup").find(".popup_button_close").trigger("click");
 }
 
+function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};
+
 function date_format_mysql_to_ger(mysql_date) {
 	dArr = mysql_date.split("-");  // ex input "2010-01-18"
 	return dArr[2]+ "." +dArr[1]+ "." +dArr[0]; //ex out: "18/01/2010"
@@ -213,11 +228,14 @@ function create_date_picker() {
 
 //Alle Tablellen von der Klasse table_data in eine Daten-Tabelle umwandeln
 function create_data_table() {
-	var allTable = $(".table_data").DataTable( {
-		paging: false,
-		dom: 'Bfrtip', //Needed for Buttons
-		buttons: [ 'csv', 'excel' ],
-	    "aaSorting": [] //No Initial Sorting
+	$(".table_data").each(function(index,ele) {
+		var arr = { paging: false,
+			dom: 'Bfrtip', //Needed for Buttons
+			buttons: [ 'csv', 'excel' ],
+	    	"aaSorting": [] //No Initial Sorting
+		};
+		if($(ele).attr("data-paging") == "true") { arr['paging'] = true; arr['pageLength'] = 10; }
+		$(ele).DataTable(arr);
 	});
 }
 
