@@ -38,14 +38,14 @@ function form_riegenliste_search_submit(data) {
 		//"Edit-Button" anlegen - CSS-Class button_delete ui-button
 		div.append($('<button/>', {
     		text: '',
-    		class: 'button_edit ui-button',
+    		class: 'button_edit2 ui-button',
     		id:'button_riegenliste_edit_' + data[i].id_riegenliste,
     		onclick: "window.location.href = 'index.php?page=riegenliste_edit&id_riegenliste=" + data[i].id_riegenliste + "'"
 		}));
 		//"Edit-Button" anlegen - CSS-Class button_delete ui-button
 		div.append($('<button/>', {
     		text: '',
-    		class: 'button_result ui-button',
+    		class: 'button_edit ui-button',
     		onclick: "window.location.href = 'index.php?page=wettkampf_result&id_riegenliste=" + data[i].id_riegenliste + "'"
 		}));
 		//"Delete-Button" anlegen - CSS-Class button_delete ui-button

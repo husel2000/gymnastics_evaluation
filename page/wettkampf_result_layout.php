@@ -91,6 +91,8 @@
 					id: "id_wert_ausgang_" + data[i].geraet[j].id_wettkampf_geraet_turner,
 		    		class: 'form-control input_number_result',
 		    		name: 'wert_ausgang',
+		    		min: 0,
+		    		max: 20,
 		    		onchange: 'wettkampf_result_edit(this)',
 		    		value: data[i].geraet[j].wert_ausgang
 				}));
@@ -99,6 +101,8 @@
 					id: "id_wert_abzug_" + data[i].geraet[j].id_wettkampf_geraet_turner,
 		    		class: 'form-control input_number_result',
 		    		name: 'wert_abzug',
+		    		min: 0,
+		    		max: 20,
 		    		onchange: 'wettkampf_result_edit(this)',
 		    		value: data[i].geraet[j].wert_abzug
 				}));

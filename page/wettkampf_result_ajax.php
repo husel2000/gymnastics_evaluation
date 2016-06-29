@@ -3,6 +3,7 @@
 //12.06.2016 - Ma.Weber - Auswahl der Turner über Alter begrenzen
 //						Aus Riegenliste löschen
 //28.06.2016 - Ma.Weber - Umgestellt, auch für "Riegenlisten" möglich
+//					Plausi für Abzug, Ausgang
 
 $error = False;
 $error_text = "";
@@ -45,6 +46,15 @@ if(empty($_POST['action'])) {
 	$id = $_POST['id_wettkampf_geraet_turner'];
 	$abzug = floatval($_POST['wert_abzug']);
 	$ausgang = floatval($_POST['wert_ausgang']);
+	if($abzug < 0 || $abzug > 20) {
+		$error = true; $error_text = "Der Abzug muss zwischen 0 und 20 liegen"; return;
+	}
+	if($ausgang < 0 || $ausgang > 20) {
+		$error = true; $error_text = "Der Ausgang muss zwischen 0 und 20 liegen"; return;
+	}
+	if($abzug > $ausgang) {
+		$error = true; $error_text = "Der Abzug kann nicht größer als der Ausgang sein"; return;
+	} 
 	$sql = "UPDATE wettkampf_geraet_turner SET wert_ausgang = ?, wert_abzug = ? where id_wettkampf_geraet_turner = ?";
 	db_select($sql,$ausgang,$abzug,$id);
 }elseif($_POST['action'] == "turner_add") {
