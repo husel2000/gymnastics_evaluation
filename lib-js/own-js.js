@@ -1,42 +1,47 @@
-function dialog_close(ele) {
-	$(ele).closest(".popup").find(".popup_button_close").trigger("click");
+//Needed, to get XLS-Reader working in IE
+if (FileReader.prototype.readAsBinaryString === undefined) {
+  FileReader.prototype.readAsBinaryString = function (fileData) {
+    var binary = "";
+    var pt = this;
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var bytes = new Uint8Array(reader.result);
+      var length = bytes.byteLength;
+      for (var i = 0; i < length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      //pt.result  - readonly so assign content to another property
+      pt.content = binary;
+      $(pt).trigger('onload');
+    };
+    reader.readAsArrayBuffer(fileData);
+  };
 }
 
-function getUrlParameter(sParam) {
-    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
-        sURLVariables = sPageURL.split('&'),
-        sParameterName,
-        i;
-
-    for (i = 0; i < sURLVariables.length; i++) {
-        sParameterName = sURLVariables[i].split('=');
-
-        if (sParameterName[0] === sParam) {
-            return sParameterName[1] === undefined ? true : sParameterName[1];
-        }
-    }
-};
+//Close open Dialog...
+function dialog_close(ele) { $(ele).closest(".popup").find(".popup_button_close").trigger("click"); }
 
 function date_format_mysql_to_ger(mysql_date) {
 	dArr = mysql_date.split("-");  // ex input "2010-01-18"
-	return dArr[2]+ "." +dArr[1]+ "." +dArr[0]; //ex out: "18/01/2010"
+	return dArr[2]+ "." +dArr[1]+ "." +dArr[0]; //ex out: "18.01.2010"
 }
-function user_import_xls_start(arr_columns,callback,filter=false) {
+
+
+function user_import_xls_start(arr_columns,callback,filter) {
 	xls_callback = callback; //Save Callback, Used in user_import_xls_return_json
 	user_import_xls_select_file();
 	xls_arr_columns = arr_columns;
 }
 
 function user_import_xls_select_file() {
-	var d = $("<input/>", { type:"file", class:"form-control xls_import", onchange:"user_import_xls_import_file(this)"});
-	dialog_create(d[0]);
+	dialog_create($("<input/>", { type:"file", class:"form-control xls_import", onchange:"user_import_xls_import_file(this)"})[0]);
 }
 
 function user_import_xls_import_file(file) {
 	var reader = new FileReader();
-	var name = file.files[0].name;
 	reader.onload = function(e) {
-		var data = e.target.result;
+	  var data;
+    if (!e) { data = reader.content; } else { data = e.target.result; }
 		var workbook = XLSX.read(data, {type: 'binary'});
 		xls_obj_json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 		user_import_xls_ask_column();
@@ -51,10 +56,8 @@ function user_import_xls_ask_column() {
 		group.append($('<label/>', { class:"control-label col-sm-2", html: entry}));
 		
 		select = $('<select/>',{ name: entry, size:1 });
-		select.append($('<option>', {value: "", text: "-" }))
-		for(var k in xls_obj_json[0]) {
-			select.append($('<option>', {value: k, text: k }))
-		}
+		select.append($('<option>', {value: "", text: "-" }));
+		for(var k in xls_obj_json[0]) select.append($('<option>', {value: k, text: k }));
 		col = $('<div/>',{ class: "col-sm-10"});
 		col.append(select);
 		group.append(col);
@@ -65,16 +68,15 @@ function user_import_xls_ask_column() {
 	group = $('<div/>', { class: "form-group" });
 	group.append($('<label/>', { class:"control-label col-sm-2", html: "Filter"}));
 	select = $('<select/>',{ name: "filter_spalte", size:1 });
-	select.append($('<option>', {value: "", text: "-" }))
+	select.append($('<option>', {value: "", text: "-" }));
 	for(var k in xls_obj_json[0]) {
-		select.append($('<option>', {value: k, text: k }))
+		select.append($('<option>', {value: k, text: k }));
 	}
 	col = $('<div/>',{ class: "col-sm-10"});
 	col.append(select);
 	group.append(col);
-	group.append($('<input>', {name: "filter_wert" }))
+	group.append($('<input>', {name: "filter_wert" }));
 	d.append(group);
-	
 	
 	d.append($('<button/>', { text:"Import", class:"btn btn-default", onclick:"user_import_xls_return_json(document.getElementsByName('user_import_xls')[0])"}));
 	dialog_create(d[0]);
@@ -90,7 +92,7 @@ function user_import_xls_return_json(div) {
 	
 	var filter_column = $(div).find('select[name="filter_spalte"]').val();
 	var filter_wert = $(div).find('input[name="filter_wert"]').val();
-	var xls_json_result = new Array();
+	var xls_json_result = [];
 	
 	xls_obj_json.forEach(function(entry) {
 		if(entry[filter_column] !== filter_wert && filter_wert !== "") return;
@@ -101,10 +103,7 @@ function user_import_xls_return_json(div) {
 		xls_json_result.push(tmp);
 	});
 	//Aufräumen...
-	$('.xls_import').each(function() {
-		dialog_close(this);
-	});
-	
+	$('.xls_import').each(function() { dialog_close(this); });
 	xls_callback(xls_json_result);
 }
 
@@ -126,7 +125,7 @@ var soundex = function (s) {
      return (r + '000').slice(0, 4).toUpperCase();
 };
 
-//CSS-Klasse f�r Buttons etc zuweisen
+//CSS-Klasse für Buttons etc zuweisen
 function css_design_button() {
 	$(":button").addClass(const_css_button);
 	$("input:submit").addClass(const_css_button);
@@ -278,15 +277,14 @@ function findHighestZIndex(elem) {
 	var highest = 0;
 	for (var i = 0; i < elems.length; i++) {
 		var zindex=document.defaultView.getComputedStyle(elems[i],null).getPropertyValue("z-index");
-		if ((zindex > highest) && (zindex != 'auto')){
-			highest = zindex;
-		}
+		if ((zindex > highest) && (zindex != 'auto')) highest = zindex;
 	}
 	return highest;
 }
 
 //Erzeugt ein Popup-Dialog
-function dialog_create(obj,callback_close,remove=true) {
+function dialog_create(obj,callback_close,remove) {
+  if(remove == "") remove = true;
 	//Popup
 	var divBackground = $('<div />', {class: "popup"});
 	//Close-Button
@@ -301,7 +299,8 @@ function dialog_create(obj,callback_close,remove=true) {
 	//Append to Body
 	var t = $('<div />');
 	t.css("max-height","500px")
-	t.css("overflow","scroll");
+	t.css("overflow-x","hidden");
+	t.css("overflow-y","auto");
 	t.append(p)
 	divBackground.append(t);
 	$('body').append(divBackground);
@@ -310,8 +309,8 @@ function dialog_create(obj,callback_close,remove=true) {
 		zIndex:(findHighestZIndex("popup")+1),
 		positionStyle: 'fixed',
 		onClose: function() { if(remove) $(divBackground).remove(); if(typeof callback_close === "function") callback_close(-1) },
-		speed: 650,
-        transition: 'slideIn',
+		  speed: 650,
+      transition: 'slideIn',
 	    transitionClose: 'slideBack'
 	});
 }

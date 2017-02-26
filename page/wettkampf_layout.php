@@ -14,6 +14,7 @@
 		form_dom.find('input[name="create_jahrgang_min"]').val(data.jahrgang_min);
 		form_dom.find('input[name="create_jahrgang_max"]').val(data.jahrgang_max);
 		form_dom.find('select[name="create_geschlecht"]').val(data.geschlecht);
+		form_dom.find('select[name="create_system"]').val(data.system);
 		form_dom.find('select[name="create_typ"]').val(data.typ);
 		form_dom.find('select[name="create_typ"]').attr("disabled",true);
 		form_dom.find('#form_wettkampf_create_geraet_parent').closest('div[class="form-group"]').hide()
@@ -23,6 +24,9 @@
 		changeWettkampfTyp(form_dom.find('select[name="create_typ"]')[0])
 		form_dom.find('input[name="create_zusatz1"]').val(data.opt_text1);
 		form_dom.find('input[name="create_zusatz2"]').val(data.opt_text2);
+		form_dom.find('input[name="create_zusatz3"]').val(data.opt_text3);
+		form_dom.find('input[name="create_zusatz4"]').val(data.opt_text4);
+		form_dom.find('input[name="create_zusatz5"]').val(data.opt_text5);
 	}
 	function wettkampf_edit(id_wettkampf) {
 		
@@ -58,6 +62,31 @@
 			text +=key + " - " + result_view[key].length + "<br>"
 		}
 		dialog_create($('<div />', {html: text})[0]);
+	}
+	
+	function form_special_result_collect_export_submit(data) {
+		if(anz_curr != anz_target) return //Continue if all results are ready
+		alert("Ready");
+	}
+	function function_special_result_collect_export() {
+		if($('#id_select_wettkampf').val() == null) {
+			dialog_create("Mindestens 1 Wettkampf auswählen");
+			return;
+		}
+		
+		//Ergebnisse für einzelnen Wettkämpfe anfragen
+		result_all = [];
+		anz_target = $('#id_select_wettkampf').val().length;
+		anz_curr = 0;
+		for(var i = 0; i < $('#id_select_wettkampf').val().length ; i++){
+			form = $('<form />', { method:"POST", action: "<?php echo Nav::_link_create_ajax("wettkampf_finish") ?>", id: "form_special_result_collect_export"}).append(
+				$('<input />', {type: "hidden", name: "action", value: "finish"})
+			).append(
+				$('<input />', {type: "hidden", name: "id_wettkampf", value: $('#id_select_wettkampf').val()[i]})	
+			)
+			create_ajax_form(form);
+			form.submit();
+		}
 	}
 	
 	function function_special_result_collect_area() {
@@ -105,7 +134,7 @@
 			if($(element).find('.dataTables_empty').length > 0) {
 				dialog_create("Die Suche nach Wettkämpfen mit eingestelltem Filter gab kein Ergebnis! Bitte Filter anpassen");
 				return;
-			} else if(index == 0) dialog_create(form[0]);
+			}else if(index == 0) dialog_create(form[0]);
 			
 			var wettkampf_text = $(element).find('td:eq(0)').text() + " - " + $(element).find('td:eq(1)').text()
 			var wettkampf_id =  $(element).find("button[id^='button_wettkampf_edit_']").attr('id')
@@ -117,6 +146,8 @@
 		dialog_close("form_special_select",null,true)
 		if($('#id_select_special').val() == "result_collect_area") {
 			function_special_select_wettkampf(function_special_result_collect_area)
+		}else if($('#id_select_special').val() == "result_collect_export") {
+			function_special_select_wettkampf(function_special_result_collect_export)
 		}
 	}
 	
@@ -128,7 +159,10 @@
 				$('<div />', { class: "col-sm-10"}).append(
 					$('<select />', { id: "id_select_special", class:"form-control" }).append(
 						$('<option />', { text:"Sammelauswertung Bereich", value: "result_collect_area"})
-				)	)
+					).append(
+						$('<option />', { text:"Sammelexport", value: "result_collect_export"})	
+					)
+				)
 			).append(
 				$('<div />', { class: "form-group"}).append(
 					$('<div />', {class: "col-sm-offset-2 col-sm-10"}).append (
@@ -214,6 +248,8 @@
 			t.row.add( [data[i].datum,data[i].bezeichnung,div.html()] ).draw();
 		}
 		css_design_button();
+		
+		//$(".buttons-csv").trigger( "click")
 	}
 
 	$( document ).ready(function() { $('#form_wettkampf_search').submit(); });
@@ -237,17 +273,12 @@
 		<div class="form-group" >
 			<label class = "control-label col-sm-2">Jahrgang (jüngester)</label>
 			<div class="col-sm-10">
-				<input type="number" min="1900" value="2002" class="form-control" name="create_jahrgang_min">
+				<input style="float:left; width:50%" type="number" min="1900" value="2002" class="form-control" name="create_jahrgang_min">
+				<input style="float:right; width:50%" type="number" min="1900" value="2001" class="form-control" name="create_jahrgang_max">
 			</div>
 		</div>
 		<div class="form-group" >
-			<label class = "control-label col-sm-2">Jahrgang (ältester)</label>
-			<div class="col-sm-10">
-				<input type="number" min="1900" value="2001" class="form-control" name="create_jahrgang_max">
-			</div>
-		</div>	
-		<div class="form-group" >
-			<label class = "control-label col-sm-2">Typ</label>
+			<label class = "control-label col-sm-2">Geschlecht</label>
 			<div class="col-sm-10">
 				<select class="form-control" name="create_geschlecht">
 					<option value="">Gemischt</option>
@@ -263,6 +294,17 @@
 					<option value="">Auswählen</option>
 	    			<option value="einzel">Einzelwettkampf</option>
 	    			<option value="einzel_bereich">Einzelwettkampf (Bereich)</option>
+	  			</select>
+			</div>
+		</div>
+		<div class="form-group" >
+			<label class = "control-label col-sm-2">System</label>
+			<div class="col-sm-10">
+				<select class="form-control" name="create_system">
+					<option value="">Auswählen</option>
+	    			<option value="lk">LK</option>
+	    			<option value="p">P-Stufen</option>
+	    			<option value="turn">Turn5/10</option>
 	  			</select>
 			</div>
 		</div>

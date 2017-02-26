@@ -56,7 +56,10 @@ if(empty($_POST['action'])) {
 		$error = true; $error_text = "Der Abzug kann nicht größer als der Ausgang sein"; return;
 	} 
 	$sql = "UPDATE wettkampf_geraet_turner SET wert_ausgang = ?, wert_abzug = ? where id_wettkampf_geraet_turner = ?";
-	db_select($sql,$ausgang,$abzug,$id);
+	
+	if(db_select($sql,$ausgang,$abzug,$id) == 1) 
+		$data = Array("id" => $id, "gesamt"=> $ausgang - $abzug);
+	else { $error = true; $error_text = "Fehler beim Eintraen in die Datenbank!"; }
 }elseif($_POST['action'] == "turner_add") {
 	$id_wettkampf = $_POST['id_wettkampf'];
 	//Alters-Grenze & Geschlecht für Wettkampf suchen und alle prüfen!
@@ -98,17 +101,31 @@ if(empty($_POST['action'])) {
 			"))";
 	$sql_turner_geraet = "Select id_wettkampf_geraet_turner,id_wettkampf_geraet,wert_ausgang,wert_abzug From wettkampf_geraet_turner where id_turner = ? and id_wettkampf_geraet in ".
 			"(Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = ?)";
-	
 	//28.06.2016 - Ma.Weber
 	if(!empty($id_riegenliste)) {
 		//Alle Wettkämpfe...
 		$wettkaempfe = db_select("Select id_wettkampf from riegenliste_wettkampf where id_riegenliste = ?",$id_riegenliste);
 		foreach($wettkaempfe As $akt_id_wettkampf) {
-			$id_wettkampfe[] = $akt_id_wettkampf[0];
+			$id_wettkaempfe[] = $akt_id_wettkampf[0];
+		}
+		//... Wettkampf-System vergleichen
+		foreach($id_wettkaempfe As $wett) {
+			$tmp = db_select("Select system,bezeichnung from wettkampf where id_wettkampf = ?",$wett);
+			if(empty($system)) {
+				$bez_1 = $tmp[0][1];
+				$system = $tmp[0][0];
+			}else {
+				if($system != $tmp[0][0]) {
+					$error = true;
+					$error_text = "Für diese Riege können keine Ergebnisse zusammen erfasst werden.";
+					$error_text .= $bez_1 . " - " . $tmp[0][1];
+					return;
+				}
+			}
 		}
 		//... Geräte vergleichen
 		$geraet = Array();
-		foreach($id_wettkampfe As $wett) {
+		foreach($id_wettkaempfe As $wett) {
 			$akt = db_select("Select bezeichnung From wettkampf_geraet where id_wettkampf = ? Order by reihenfolge",$wett);
 			$new = Array();
 			for($i = 0; $i < sizeof($akt);$i++) $new[] = $akt[$i][0];
@@ -126,13 +143,12 @@ if(empty($_POST['action'])) {
 				return;
 			}
 		}
-				
 	}elseif(!empty($id_wettkampf)) {
-		$id_wettkampfe[] = $id_wettkampf;
+		$id_wettkaempfe[] = $id_wettkampf;
 	}
 	
 	$data = Array();
-	foreach($id_wettkampfe As $id_wettkampf) { 
+	foreach($id_wettkaempfe As $id_wettkampf) { 
 		$turner = db_select($sql_turner,$id_wettkampf,$id_wettkampf);
 		foreach($turner As $row) {
 			$turner = Array();

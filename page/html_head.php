@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+<?php header("Content-Type: text/html; charset=UTF-8"); ?><!DOCTYPE html>
 <html>
 	<head>
 		<title><?php echo $title ?></title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		
 		<script src="./lib-js/jquery-1.12.0.min.js" type="text/javascript"></script> <!-- JQuery -->
+		<script src="./lib-js/tinymce/tinymce.min.js" type="text/javascript"></script> <!-- TinyMCE -->
 		
 		<script src="./lib-js/jquery-ui.js" type="text/javascript"></script> <!-- JQuery UI -->
 		<link href="./css/jquery.ui.css"  rel="stylesheet"> <!-- JQuery UI -->
@@ -59,6 +60,7 @@
 					<li class="<?php if(Nav::_get_akt() == "wettkampf") echo "active";?>"><a href="<?php echo Nav::_link_create("wettkampf"); ?>">Wettkampf</a></li>
 					<li class="<?php if(Nav::_get_akt() == "turner") echo "active";?>"><a href="<?php echo Nav::_link_create("turner"); ?>">Turner</a></li>
 					<li class="<?php if(Nav::_get_akt() == "riegenliste") echo "active";?>"><a href="<?php echo Nav::_link_create("riegenliste"); ?>">Riegenliste</a></li>
+          <li class="<?php if(Nav::_get_akt() == "urkunde") echo "active";?>"><a href="<?php echo Nav::_link_create("urkunde"); ?>">Urkunde</a></li>				
 				</ul>
 			</div>
 			<!-- /.navbar-collapse -->

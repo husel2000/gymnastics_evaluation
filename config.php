@@ -8,7 +8,8 @@ Rules:
 define("PATH_ROOT","/home/maweber/bin/php/wettkampf/");
 define("PAGE_TITEL","Wettkampf-Verwaltung");
 
-define("URIIMAGES", "/wettkampf/images/");
+define("URI","/wettkampf/");
+define("URIIMAGES", URI . "images/");
 
 //Paths (Filesystem)
 define("FOLDERPAGE",PATH_ROOT . "page/");

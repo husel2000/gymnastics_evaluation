@@ -40,6 +40,8 @@ function db_timestamp_to_date($timestamp) {
  */
 function db_select($sql) {
 	$link = db_connect() or exception_throw("DB-Connection Failed". mysqli_connect_error());
+	$link->set_charset("utf8");
+	//error_log(mysqli_get_charset($link)->charset);
 	$stmt = mysqli_prepare($link,$sql) or exception_throw("DB-Prepare Failed". mysqli_error($link) ."<br>$sql");
 
 	$param_type = "";
