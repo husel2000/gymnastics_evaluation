@@ -226,21 +226,21 @@
 			//"Edit-Button" anlegen - CSS-Class button_delete ui-button
 			div.append($('<button/>', {
         		text: '',
-        		class: 'button_edit2 ui-button',
+        		class: 'button button_edit2 ui-button',
         		id:'button_wettkampf_edit_' + data[i].id_wettkampf,
         		onclick: "wettkampf_edit(" + data[i].id_wettkampf + ")"
     		}));
 			//"Edit-Button" anlegen - CSS-Class button_delete ui-button
 			div.append($('<button/>', {
         		text: '',
-        		class: 'button_edit ui-button',
+        		class: 'button button_edit ui-button',
         		id:'button_wettkampf_result_' + data[i].id_wettkampf,
         		onclick: "window.location.href = 'index.php?page=wettkampf_result&id_wettkampf=" + data[i].id_wettkampf + "'"
     		}));
 			//"Result-Button" anlegen - CSS-Class button_delete ui-button
 			div.append($('<button/>', {
         		text: '',
-        		class: 'button_result ui-button',
+        		class: 'button button_result ui-button',
         		id:'button_wettkampf_finish_' + data[i].id_wettkampf,
         		onclick: "window.location.href = 'index.php?page=wettkampf_finish&id_wettkampf=" + data[i].id_wettkampf + "'"
     		}));

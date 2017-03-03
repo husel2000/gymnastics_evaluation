@@ -14,7 +14,7 @@
   }
   
   function print_start(json_data) {
-    form = $('<form>', { method:"POST", target:"_blank", action: "./page/print_a4_template.php" }).append(
+    form = $('<form>', { method:"POST", target:"_blank", action: "./page/print_a4_urkunde.php" }).append(
 		  $('<input />', {type: "hidden", name: "code", value: tinymce.activeEditor.getContent()})
 	  ).append(
 		  $('<input />', {type: "hidden", name: "data", value: JSON.stringify(json_data)})

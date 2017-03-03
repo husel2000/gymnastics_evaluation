@@ -255,6 +255,22 @@ $(document).ready( function () {
 	css_design();
 });
 
+function dialog_create_select(html_text,arr_value,callback) {
+  var content = $('<div />');
+  content.append($('<p />', { text: html_text }));
+	var sel = $('<select />', { name: "select_option", class:"form-control" })
+	$.each(arr_value, function( index, value ) {
+    sel.append($('<option />', { text:value, value: index} ));
+  });
+	content.append(sel);
+  content.append($('<div />',{
+		text: "Ausführen",
+		class:"btn btn-default popup_button b-close",
+		click: function() {callback(content.find("[name='select_option']").val()); dialog_close(".popup") }
+	}));
+	dialog_create(content[0]);
+}
+
 function dialog_create_yesno(html_text,text_yes,text_no,callback) {
 	var content = $('<div />');
 	called = false

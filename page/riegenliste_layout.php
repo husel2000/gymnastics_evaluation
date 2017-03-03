@@ -1,6 +1,16 @@
 <?php
 	//14.06.2016 - Ma.Weber - Riege löschen
 ?><script type="text/javascript">
+function button_riegenliste_print_ask(id_riegenliste) {
+  dialog_create_select("Aktion",{ "kari": "Kampfrichter Listen" },function(res) { 
+    if(res == "kari") {
+      var form = $('<form />', { target:"_blank", method:"GET", action: "./page/print_a4_riegenliste_kari.php"})
+			.append($('<input />', {type: "hidden", name: "id_riegenliste", value: id_riegenliste }))
+			.hide().appendTo('body').submit();
+    }
+  });
+}
+
 function form_riegenliste_create_show() {
 	$('#form_riegenliste_create')[0].reset();	
 	dialog_create($('#form_riegenliste_create')[0])
@@ -38,20 +48,26 @@ function form_riegenliste_search_submit(data) {
 		//"Edit-Button" anlegen - CSS-Class button_delete ui-button
 		div.append($('<button/>', {
     		text: '',
-    		class: 'button_edit2 ui-button',
+    		class: 'button button_edit2 ui-button',
     		id:'button_riegenliste_edit_' + data[i].id_riegenliste,
     		onclick: "window.location.href = 'index.php?page=riegenliste_edit&id_riegenliste=" + data[i].id_riegenliste + "'"
 		}));
 		//"Edit-Button" anlegen - CSS-Class button_delete ui-button
 		div.append($('<button/>', {
     		text: '',
-    		class: 'button_edit ui-button',
+    		class: 'button button_edit ui-button',
     		onclick: "window.location.href = 'index.php?page=wettkampf_result&id_riegenliste=" + data[i].id_riegenliste + "'"
+		}));
+		//"Listen-Button" anlegen - CSS-Class button_delete ui-button
+		div.append($('<button/>', {
+    		text: '',
+    		class: 'button button_list ui-button',
+    		onclick: "button_riegenliste_print_ask(" + data[i].id_riegenliste + ")"
 		}));
 		//"Delete-Button" anlegen - CSS-Class button_delete ui-button
 		div.append($('<button/>', {
     		text: '',
-    		class: 'button_delete ui-button',
+    		class: 'button button_delete ui-button',
     		id:'button_riegenliste_delete_' + data[i].id_riegenliste,
     		onclick: "riegenliste_delete(" +  data[i].id_riegenliste + ")"
 		}));

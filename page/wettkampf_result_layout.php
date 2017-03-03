@@ -127,7 +127,7 @@
 			//"Delete-Button" anlegen - CSS-Class button_delete ui-button
 			var div = $('<div />').append($('<button/>', {
 	    		text: '',
-	    		class: 'button_delete ui-button',
+	    		class: 'button button_delete ui-button',
 	    		onclick: "turner_delete(" + data[i].id_turner + ")"
 			}));
 			arr_col[data[i].geraet.length+2]  = div.html(); 		

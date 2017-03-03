@@ -2,12 +2,8 @@
 header("Content-type: text/css");
 require_once("../config.php");
 ?>
-.ui-button {
-	font-size: 0.7em;
-}
-.ui-drag {
-	cursor: move
-}
+.ui-button { font-size: 0.7em; }
+.ui-drag { cursor: move }
 
 .input_number_result {
 	margin:0px;
@@ -23,14 +19,15 @@ require_once("../config.php");
 	border-width:4px;
 }
 
-.display_none {
-	display:none;
-}
+.hide { display:none; }
+
+
 .form_inline {
 	display:inline;
 	margin:0px;
 	padding:0px;
 }
+
 .form_inline input{
 	width: 100%;
 }
@@ -39,86 +36,37 @@ require_once("../config.php");
 	border-radius: 2px;
 }
 
-.button_edit {
+.button {
 	background-size: 100%;
 	width:5em;
 	height:5em;
 	margin:0px;
 	padding:0px;
-	background-image:url(<?php echo URIIMAGES . "icon-edit.png"; ?>);
 	background-repeat: no-repeat;
 	background-position: 50% center;
 }
 
-.button_edit2 {
-	background-size: 100%;
-	width:5em;
-	height:5em;
-	margin:0px;
-	padding:0px;
-	background-image:url(<?php echo URIIMAGES . "icon-edit2.png"; ?>);
-	background-repeat: no-repeat;
-	background-position: 50% center;
-}
+.button_edit { background-image:url(<?php echo URIIMAGES . "icon-edit.png"; ?>); }
+.button_edit2 { background-image:url(<?php echo URIIMAGES . "icon-edit2.png"; ?>); }
+.button_list { background-image:url(<?php echo URIIMAGES . "icon-list.png"; ?>); }
+.button_delete { background-image:url(<?php echo URIIMAGES . "icon-delete.png"; ?>); }
+.button_result { background-image:url(<?php echo URIIMAGES . "icon-podest.png"; ?>); }
+.button_save { background-image:url(<?php echo URIIMAGES . "save.png"; ?>); }
 
 .button_up {
-	background-size: 100%;
 	width:1.5em;
 	height:1.5em;
-	margin:0px;
-	padding:0px;
 	background-color: Transparent;
 	background-image:url(<?php echo URIIMAGES . "arrow-up.png"; ?>);
-	background-repeat: no-repeat;
-	background-position: 50% center;
 	border: none;
 }
 
 .button_down {
-	background-size: 100%;
 	width:1.5em;
 	height:1.5em;
-	margin:0px;
-	padding:0px;
 	background-image:url(<?php echo URIIMAGES . "arrow-down.png"; ?>);
 	background-color: Transparent;
-	background-repeat: no-repeat;
-	background-position: 50% center;
-	border: none;
 }
-
-.button_delete {
-	background-size: 100%;
-	width:5em;
-	height:5em;
-	margin:0px;
-	padding:0px;
-	background-image:url(<?php echo URIIMAGES . "icon-delete.png"; ?>);
-	background-repeat: no-repeat;
-	background-position: 50% center;
-}
-.button_result {
-	background-size: 100%;
-	width:5em;
-	height:5em;
-	margin:0px;
-	padding:0px;
-	background-image:url(<?php echo URIIMAGES . "icon-podest.png"; ?>);
-	background-repeat: no-repeat;
-	background-position: 50% center;
-}
-
-.button_save {
-	background-size: 100%;
-	width:5em;
-	height:5em;
-	margin:0px;
-	padding:0px;
-	background-image:url(<?php echo URIIMAGES . "save.png"; ?>);
-	background-repeat: no-repeat;
-	background-position: 50% center;
-}
-
 
 .input_range {
 	width:50%;
@@ -126,4 +74,47 @@ require_once("../config.php");
 
 .row_odd {
 	background-color:#ffcc99
+}
+
+/* DINA 4 Page */
+body .print {
+    margin: 0;
+    padding: 0;
+    background-color: #FAFAFA;
+}
+
+.print .page {
+  width: 21cm;
+  height: 28.5cm;
+  padding: 0;
+  margin: 0.5cm auto;
+  border: 1px red solid;
+  border-radius: 1px;
+  background: white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 14px;
+  line-height: 1;
+}
+.print .page p {margin: 0; }
+
+@page {
+  size: A4;
+  margin: 0;
+}
+@media print {
+  .print .page {
+    margin: 0;
+    border: initial;
+    border-radius: initial;
+    width: initial;
+    min-height: initial;
+    box-shadow: initial;
+    background: initial;
+    page-break-after: always;
+  }
+  
+  .noprint {
+    display:none;
+  }
 }

@@ -81,23 +81,23 @@ function form_riegenliste_get_submit(data) {
 		Object.keys(data[riege_liste]).forEach(function (key) {
 			var divRiege = $('<div />');
 			divRiege.append($('<button/>', {
-        		class: 'button_up',
+        		class: 'button button_up',
         		onclick: "table_riegenliste_riege_switch(this,'-')"
     		}));
     		divRiege.append($('<span />', { text: riege_liste}));
     		divRiege.append($('<button/>', {
-        		class: 'button_down',
+        		class: 'button button_down',
         		onclick: "table_riegenliste_riege_switch(this,'+')"
     		}));
     		
     		var divPos = $('<div />');
 			divPos.append($('<button/>', {
-        		class: 'button_up',
+        		class: 'button button_up',
         		onclick: "table_riegenliste_pos_switch(this,'-')"
     		}));
     		divPos.append($('<span />', { text: key}));
     		divPos.append($('<button/>', {
-        		class: 'button_down',
+        		class: 'button button_down',
         		onclick: "table_riegenliste_pos_switch(this,'+')"
     		}));
 			
