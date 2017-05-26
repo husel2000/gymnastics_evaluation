@@ -1,6 +1,6 @@
 /* 15.2.12.3 Extended File Properties Part */
 /* [MS-OSHARED] 2.3.3.2.[1-2].1 (PIDSI/PIDDSI) */
-var EXT_PROPS = [
+var EXT_PROPS/*:Array<Array<string> >*/ = [
 	["Application", "Application", "string"],
 	["AppVersion", "AppVersion", "string"],
 	["Company", "Company", "string"],
@@ -33,16 +33,43 @@ function parse_ext_props(data, p) {
 
 	if(q.HeadingPairs && q.TitlesOfParts) {
 		var v = parseVector(q.HeadingPairs);
-		var j = 0, widx = 0;
-		for(var i = 0; i !== v.length; ++i) {
+		var parts = parseVector(q.TitlesOfParts).map(function(x) { return x.v; });
+		var idx = 0, len = 0;
+		for(var i = 0; i !== v.length; i+=2) {
+			len = +(v[i+1].v);
 			switch(v[i].v) {
-				case "Worksheets": widx = j; p.Worksheets = +(v[++i].v); break;
-				case "Named Ranges": ++i; break; // TODO: Handle Named Ranges
+				case "Worksheets":
+				case "工作表":
+				case "Листы":
+				case "ワークシート":
+				case "גליונות עבודה":
+				case "Arbeitsblätter":
+				case "Çalışma Sayfaları":
+				case "Feuilles de calcul":
+				case "Fogli di lavoro":
+				case "Folhas de cálculo":
+				case "Planilhas":
+				case "Werkbladen":
+					p.Worksheets = len;
+					p.SheetNames = parts.slice(idx, idx + len);
+					break;
+
+				case "Named Ranges":
+				case "Benannte Bereiche":
+					p.NamedRanges = len;
+					p.DefinedNames = parts.slice(idx, idx + len);
+					break;
+
+				case "Charts":
+				case "Diagramme":
+					p.Chartsheets = len;
+					p.ChartNames = parts.slice(idx, idx + len);
+					break;
 			}
+			idx += len;
 		}
-		var parts = parseVector(q.TitlesOfParts).map(function(x) { return utf8read(x.v); });
-		p.SheetNames = parts.slice(widx, widx + p.Worksheets);
 	}
+
 	return p;
 }
 
@@ -51,7 +78,7 @@ var EXT_PROPS_XML_ROOT = writextag('Properties', null, {
 	'xmlns:vt': XMLNS.vt
 });
 
-function write_ext_props(cp, opts) {
+function write_ext_props(cp, opts)/*:string*/ {
 	var o = [], p = {}, W = writextag;
 	if(!cp) cp = {};
 	cp.Application = "SheetJS";
@@ -62,7 +89,7 @@ function write_ext_props(cp, opts) {
 		if(cp[f[1]] === undefined) return;
 		var v;
 		switch(f[2]) {
-			case 'string': v = cp[f[1]]; break;
+			case 'string': v = String(cp[f[1]]); break;
 			case 'bool': v = cp[f[1]] ? 'true' : 'false'; break;
 		}
 		if(v !== undefined) o[o.length] = (W(f[0], v));
@@ -70,7 +97,7 @@ function write_ext_props(cp, opts) {
 
 	/* TODO: HeadingPairs, TitlesOfParts */
 	o[o.length] = (W('HeadingPairs', W('vt:vector', W('vt:variant', '<vt:lpstr>Worksheets</vt:lpstr>')+W('vt:variant', W('vt:i4', String(cp.Worksheets))), {size:2, baseType:"variant"})));
-	o[o.length] = (W('TitlesOfParts', W('vt:vector', cp.SheetNames.map(function(s) { return "<vt:lpstr>" + s + "</vt:lpstr>"; }).join(""), {size: cp.Worksheets, baseType:"lpstr"})));
+	o[o.length] = (W('TitlesOfParts', W('vt:vector', cp.SheetNames.map(function(s) { return "<vt:lpstr>" + escapexml(s) + "</vt:lpstr>"; }).join(""), {size: cp.Worksheets, baseType:"lpstr"})));
 	if(o.length>2){ o[o.length] = ('</Properties>'); o[1]=o[1].replace("/>",">"); }
 	return o.join("");
 }

@@ -23,7 +23,7 @@ if(empty($_POST['action'])) {
 }elseif($_POST['action'] == "search") {
 	$filter = $_POST['search_text'];
 	
-	$sql = "Select id_wettkampf,DATE_FORMAT(datum, '%d.%m.%Y'),bezeichnung,geschlecht from wettkampf where bezeichnung like CONCAT('%',?,'%') order by datum desc";
+	$sql = "Select id_wettkampf,DATE_FORMAT(datum, '%d.%m.%Y'),bezeichnung,geschlecht from wettkampf where bezeichnung like CONCAT('%',?,'%') order by datum desc,bezeichnung desc";
 	$res = db_select($sql,$filter);
 	$data = Array();
 	foreach($res As $row) {
@@ -56,22 +56,22 @@ if(empty($_POST['action'])) {
 		if(empty($typ) && empty($id_wettkampf)) { $error = True; $error_text = "Kein Wettkampf-Typ angegeben"; return; }
 		if(!is_array($arr_geraet) || count($arr_geraet) == 0 || (count($arr_geraet) == 1 && $arr_geraet[0] == "")) { $error = True; $error_text = "Ein Gerät muss mindestens 1 Gerät beinhalten!"; return; }
 		
-		$id_wettkampf = db_select("INSERT INTO wettkampf (datum,bezeichnung,jahrgang_min,jahrgang_max,geschlecht,typ,syste) VALUES(STR_TO_DATE(?,'%d.%m.%Y'),?,?,?,?,?)",$datum,$name,$jahrgang_min,$jahrgang_max,$geschlecht,$typ,$system);
+		$id = db_select("INSERT INTO wettkampf (datum,bezeichnung,jahrgang_min,jahrgang_max,geschlecht,typ,system) VALUES(STR_TO_DATE(?,'%d.%m.%Y'),?,?,?,?,?,?)",$datum,$name,$jahrgang_min,$jahrgang_max,$geschlecht,$typ,$system);
 		if(!is_numeric($id) || empty($id)) { $error = True; $error_text = "Fehler beim anlegen des Wettkampfes"; return; }
 		
 		for($i = 0; $i < count($arr_geraet); ++$i){
 			if($arr_geraet[$i] != "") db_select("INSERT INTO wettkampf_geraet (id_wettkampf,reihenfolge,bezeichnung) VALUES(?,?,?)",$id,$i,$arr_geraet[$i]);
 		}
 	}else {
-		db_select("UPDATE wettkampf SET datum = STR_TO_DATE(?,'%d.%m.%Y'), bezeichnung = ?, jahrgang_min = ?, jahrgang_max = ?,geschlecht = ?, system = ? WHERE id_wettkampf = ?",$datum,$name,$jahrgang_min, $jahrgang_max,$geschlecht,$system, $id_wettkampf);
+		db_select("UPDATE wettkampf SET datum = STR_TO_DATE(?,'%d.%m.%Y'), bezeichnung = ?, jahrgang_min = ?, jahrgang_max = ?,geschlecht = ?, system = ? WHERE id_wettkampf = ?",$datum,$name,$jahrgang_min, $jahrgang_max,$geschlecht,$system, $id);
 	}
 	
 	//Optionale Daten
-	if(isset($_POST['create_zusatz1'])) db_select("UPDATE wettkampf SET opt_text1 = ? Where id_wettkampf = ?",$_POST['create_zusatz1'],$id_wettkampf);
-	if(isset($_POST['create_zusatz2'])) db_select("UPDATE wettkampf SET opt_text2 = ?  Where id_wettkampf = ?",$_POST['create_zusatz2'],$id_wettkampf);
-	if(isset($_POST['create_zusatz3'])) db_select("UPDATE wettkampf SET opt_text3 = ? Where id_wettkampf = ?",$_POST['create_zusatz3'],$id_wettkampf);
-	if(isset($_POST['create_zusatz4'])) db_select("UPDATE wettkampf SET opt_text4 = ? Where id_wettkampf = ?",$_POST['create_zusatz4'],$id_wettkampf);
-	if(isset($_POST['create_zusatz5'])) db_select("UPDATE wettkampf SET opt_text5 = ? Where id_wettkampf = ?",$_POST['create_zusatz5'],$id_wettkampf);
-	$data = $id_wettkampf;
+	if(isset($_POST['create_zusatz1'])) db_select("UPDATE wettkampf SET opt_text1 = ? Where id_wettkampf = ?",$_POST['create_zusatz1'],$id);
+	if(isset($_POST['create_zusatz2'])) db_select("UPDATE wettkampf SET opt_text2 = ?  Where id_wettkampf = ?",$_POST['create_zusatz2'],$id);
+	if(isset($_POST['create_zusatz3'])) db_select("UPDATE wettkampf SET opt_text3 = ? Where id_wettkampf = ?",$_POST['create_zusatz3'],$id);
+	if(isset($_POST['create_zusatz4'])) db_select("UPDATE wettkampf SET opt_text4 = ? Where id_wettkampf = ?",$_POST['create_zusatz4'],$id);
+	if(isset($_POST['create_zusatz5'])) db_select("UPDATE wettkampf SET opt_text5 = ? Where id_wettkampf = ?",$_POST['create_zusatz5'],$id);
+	$data = $id;
 }
 ?>

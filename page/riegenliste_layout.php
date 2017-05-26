@@ -13,7 +13,7 @@ function button_riegenliste_print_ask(id_riegenliste) {
 
 function form_riegenliste_create_show() {
 	$('#form_riegenliste_create')[0].reset();	
-	dialog_create($('#form_riegenliste_create')[0])
+	dialog_create($('#form_riegenliste_create')[0],null,false)
 }
 
 function riegenliste_delete(id_riegenliste) { 

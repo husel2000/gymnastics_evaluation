@@ -1,5 +1,5 @@
 /* [MS-XLS] 2.4.326 TODO: payload is a zip file */
-function parse_Theme(blob, length) {
+function parse_Theme(blob, length, opts) {
 	var dwThemeVersion = blob.read_shift(4);
 	if(dwThemeVersion === 124226) return;
 	blob.l += length-4;
@@ -68,10 +68,15 @@ function update_xfext(xf, xfext) {
 		switch(xfe[0]) { /* 2.5.108 extPropData */
 			case 0x04: break; /* foreground color */
 			case 0x05: break; /* background color */
-			case 0x07: case 0x08: case 0x09: case 0x0a: break;
+			case 0x06: break; /* gradient fill */
+			case 0x07: break; /* top cell border color */
+			case 0x08: break; /* bottom cell border color */
+			case 0x09: break; /* left cell border color */
+			case 0x0a: break; /* right cell border color */
+			case 0x0b: break; /* diagonal cell border color */
 			case 0x0d: break; /* text color */
 			case 0x0e: break; /* font scheme */
-			default: throw "bafuq" + xfe[0].toString(16);
+			case 0x0f: break; /* indentation level */
 		}
 	});
 }

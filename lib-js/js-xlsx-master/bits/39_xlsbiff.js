@@ -1,11 +1,11 @@
 /* --- MS-XLS --- */
 
 /* 2.5.19 */
-function parse_XLSCell(blob, length) {
+function parse_XLSCell(blob, length)/*:Cell*/ {
 	var rw = blob.read_shift(2); // 0-indexed
 	var col = blob.read_shift(2);
 	var ixfe = blob.read_shift(2);
-	return {r:rw, c:col, ixfe:ixfe};
+	return ({r:rw, c:col, ixfe:ixfe}/*:any*/);
 }
 
 /* 2.5.134 */
@@ -21,7 +21,7 @@ function parse_frtHeader(blob) {
 function parse_OptXLUnicodeString(blob, length, opts) { return length === 0 ? "" : parse_XLUnicodeString2(blob, length, opts); }
 
 /* 2.5.158 */
-var HIDEOBJENUM = ['SHOWALL', 'SHOWPLACEHOLDER', 'HIDEALL'];
+//var HIDEOBJENUM = ['SHOWALL', 'SHOWPLACEHOLDER', 'HIDEALL'];
 var parse_HideObjEnum = parseuint16;
 
 /* 2.5.344 */
@@ -34,18 +34,17 @@ function parse_XTI(blob, length) {
 function parse_RkRec(blob, length) {
 	var ixfe = blob.read_shift(2);
 	var RK = parse_RkNumber(blob);
-	//console.log("::", ixfe, RK,";;");
 	return [ixfe, RK];
 }
 
 /* 2.5.1 */
-function parse_AddinUdf(blob, length) {
+function parse_AddinUdf(blob, length, opts) {
 	blob.l += 4; length -= 4;
 	var l = blob.l + length;
-	var udfName = parse_ShortXLUnicodeString(blob, length);
+	var udfName = parse_ShortXLUnicodeString(blob, length, opts);
 	var cb = blob.read_shift(2);
 	l -= blob.l;
-	if(cb !== l) throw "Malformed AddinUdf: padding = " + l + " != " + cb;
+	if(cb !== l) throw new Error("Malformed AddinUdf: padding = " + l + " != " + cb);
 	blob.l += cb;
 	return udfName;
 }
@@ -100,35 +99,39 @@ function parse_FtCf(blob, length) {
 }
 
 /* 2.5.140 - 2.5.154 and friends */
+function parse_FtSkip(blob, length) { blob.l += 2; blob.l += blob.read_shift(2); }
 var FtTab = {
-	0x15: parse_FtCmo,
-	0x13: parsenoop,                                /* FtLbsData */
-	0x12: function(blob, length) { blob.l += 12; }, /* FtCblsData */
-	0x11: function(blob, length) { blob.l += 8; },  /* FtRboData */
-	0x10: parsenoop,                                /* FtEdoData */
-	0x0F: parsenoop,                                /* FtGboData */
-	0x0D: parse_FtNts,                              /* FtNts */
-	0x0C: function(blob, length) { blob.l += 24; }, /* FtSbs */
-	0x0B: function(blob, length) { blob.l += 10; }, /* FtRbo */
-	0x0A: function(blob, length) { blob.l += 16; }, /* FtCbls */
-	0x09: parsenoop,                                /* FtPictFmla */
-	0x08: function(blob, length) { blob.l += 6; },  /* FtPioGrbit */
-	0x07: parse_FtCf,                               /* FtCf */
-	0x06: function(blob, length) { blob.l += 6; },  /* FtGmo */
-	0x04: parsenoop,                                /* FtMacro */
-	0x00: function(blob, length) { blob.l += 4; }   /* FtEnding */
+	/*::[*/0x00/*::]*/: parse_FtSkip,      /* FtEnd */
+	/*::[*/0x04/*::]*/: parse_FtSkip,      /* FtMacro */
+	/*::[*/0x05/*::]*/: parse_FtSkip,      /* FtButton */
+	/*::[*/0x06/*::]*/: parse_FtSkip,      /* FtGmo */
+	/*::[*/0x07/*::]*/: parse_FtCf,        /* FtCf */
+	/*::[*/0x08/*::]*/: parse_FtSkip,      /* FtPioGrbit */
+	/*::[*/0x09/*::]*/: parse_FtSkip,      /* FtPictFmla */
+	/*::[*/0x0A/*::]*/: parse_FtSkip,      /* FtCbls */
+	/*::[*/0x0B/*::]*/: parse_FtSkip,      /* FtRbo */
+	/*::[*/0x0C/*::]*/: parse_FtSkip,      /* FtSbs */
+	/*::[*/0x0D/*::]*/: parse_FtNts,       /* FtNts */
+	/*::[*/0x0E/*::]*/: parse_FtSkip,      /* FtSbsFmla */
+	/*::[*/0x0F/*::]*/: parse_FtSkip,      /* FtGboData */
+	/*::[*/0x10/*::]*/: parse_FtSkip,      /* FtEdoData */
+	/*::[*/0x11/*::]*/: parse_FtSkip,      /* FtRboData */
+	/*::[*/0x12/*::]*/: parse_FtSkip,      /* FtCblsData */
+	/*::[*/0x13/*::]*/: parse_FtSkip,      /* FtLbsData */
+	/*::[*/0x14/*::]*/: parse_FtSkip,      /* FtCblsFmla */
+	/*::[*/0x15/*::]*/: parse_FtCmo
 };
 function parse_FtArray(blob, length, ot) {
-	var s = blob.l;
+	var tgt = blob.l + length;
 	var fts = [];
-	while(blob.l < s + length) {
+	while(blob.l < tgt) {
 		var ft = blob.read_shift(2);
 		blob.l-=2;
 		try {
-			fts.push(FtTab[ft](blob, s + length - blob.l));
-		} catch(e) { blob.l = s + length; return fts; }
+			fts.push(FtTab[ft](blob, tgt - blob.l));
+		} catch(e) { blob.l = tgt; return fts; }
 	}
-	if(blob.l != s + length) blob.l = s + length; //throw "bad Object Ft-sequence";
+	if(blob.l != tgt) blob.l = tgt; //throw new Error("bad Object Ft-sequence");
 	return fts;
 }
 
@@ -139,15 +142,17 @@ var parse_FontIndex = parseuint16;
 
 /* 2.4.21 */
 function parse_BOF(blob, length) {
-	var o = {};
+	var o = {BIFFVer:0, dt:0};
 	o.BIFFVer = blob.read_shift(2); length -= 2;
+	if(length >= 2) { o.dt = blob.read_shift(2); blob.l -= 2; }
 	switch(o.BIFFVer) {
 		case 0x0600: /* BIFF8 */
 		case 0x0500: /* BIFF5 */
 		case 0x0002: case 0x0007: /* BIFF2 */
 			break;
-		default: throw "Unexpected BIFF Ver " + o.BIFFVer;
+		default: if(length > 6) throw new Error("Unexpected BIFF Ver " + o.BIFFVer);
 	}
+
 	blob.read_shift(length);
 	return o;
 }
@@ -157,7 +162,7 @@ function parse_BOF(blob, length) {
 function parse_InterfaceHdr(blob, length) {
 	if(length === 0) return 0x04b0;
 	var q;
-	if((q=blob.read_shift(2))!==0x04b0) throw 'InterfaceHdr codePage ' + q;
+	if((q=blob.read_shift(2))!==0x04b0){/* empty */}
 	return 0x04b0;
 }
 
@@ -175,7 +180,7 @@ function parse_WriteAccess(blob, length, opts) {
 /* 2.4.28 */
 function parse_BoundSheet8(blob, length, opts) {
 	var pos = blob.read_shift(4);
-	var hidden = blob.read_shift(1) >> 6;
+	var hidden = blob.read_shift(1) & 0x03;
 	var dt = blob.read_shift(1);
 	switch(dt) {
 		case 0: dt = 'Worksheet'; break;
@@ -189,10 +194,10 @@ function parse_BoundSheet8(blob, length, opts) {
 }
 
 /* 2.4.265 TODO */
-function parse_SST(blob, length) {
+function parse_SST(blob, length)/*:SST*/ {
 	var cnt = blob.read_shift(4);
 	var ucnt = blob.read_shift(4);
-	var strs = [];
+	var strs/*:SST*/ = ([]/*:any*/);
 	for(var i = 0; i != ucnt; ++i) {
 		strs.push(parse_XLUnicodeRichExtendedString(blob));
 	}
@@ -209,21 +214,26 @@ function parse_ExtSST(blob, length) {
 }
 
 
-/* 2.4.221 TODO*/
+/* 2.4.221 TODO: check BIFF2-4 */
 function parse_Row(blob, length) {
-	var rw = blob.read_shift(2), col = blob.read_shift(2), Col = blob.read_shift(2), rht = blob.read_shift(2);
-	blob.read_shift(4); // reserved(2), unused(2)
+	var z = ({}/*:any*/);
+	z.r = blob.read_shift(2);
+	z.c = blob.read_shift(2);
+	z.cnt = blob.read_shift(2) - z.c;
+	var miyRw = blob.read_shift(2);
+	blob.l += 4; // reserved(2), unused(2)
 	var flags = blob.read_shift(1); // various flags
-	blob.read_shift(1); // reserved
-	blob.read_shift(2); //ixfe, other flags
-	return {r:rw, c:col, cnt:Col-col};
+	blob.l += 3; // reserved(8), ixfe(12), flags(4)
+	if(flags & 0x20) z.hidden = true;
+	if(flags & 0x40) z.hpt = miyRw / 20;
+	return z;
 }
 
 
 /* 2.4.125 */
 function parse_ForceFullCalculation(blob, length) {
 	var header = parse_frtHeader(blob);
-	if(header.type != 0x08A3) throw "Invalid Future Record " + header.type;
+	if(header.type != 0x08A3) throw new Error("Invalid Future Record " + header.type);
 	var fullcalc = blob.read_shift(4);
 	return fullcalc !== 0x0;
 }
@@ -240,9 +250,15 @@ function parse_RecalcId(blob, length) {
 }
 
 /* 2.4.87 */
-function parse_DefaultRowHeight (blob, length) {
-	var f = blob.read_shift(2), miyRw;
-	miyRw = blob.read_shift(2); // flags & 0x02 -> hidden, else empty
+function parse_DefaultRowHeight(blob, length, opts) {
+	var f = 0;
+	if(!(opts && opts.biff == 2)) {
+		f = blob.read_shift(2);
+	}
+	var miyRw = blob.read_shift(2);
+	if((opts && opts.biff == 2)) {
+		f = 1 - (miyRw >> 15); miyRw &= 0x7fff;
+	}
 	var fl = {Unsynced:f&1,DyZero:(f&2)>>1,ExAsc:(f&4)>>2,ExDsc:(f&8)>>3};
 	return [fl, miyRw];
 }
@@ -258,9 +274,17 @@ function parse_Window1(blob, length) {
 
 /* 2.4.122 TODO */
 function parse_Font(blob, length, opts) {
-	blob.l += 14;
-	var name = parse_ShortXLUnicodeString(blob, 0, opts);
-	return name;
+	var o/*:any*/ = {
+		dyHeight: blob.read_shift(2),
+		fl: blob.read_shift(2)
+	};
+	switch(opts && opts.biff || 8) {
+		case 2: break;
+		case 3: case 4: blob.l += 2; break;
+		default: blob.l += 10; break;
+	}
+	o.name = parse_ShortXLUnicodeString(blob, 0, opts);
+	return o;
 }
 
 /* 2.4.149 */
@@ -272,8 +296,10 @@ function parse_LabelSst(blob, length) {
 
 /* 2.4.148 */
 function parse_Label(blob, length, opts) {
+	var target = blob.l + length;
 	var cell = parse_XLSCell(blob, 6);
-	var str = parse_XLUnicodeString(blob, length-6, opts);
+	if(opts.biff == 2) blob.l++;
+	var str = parse_XLUnicodeString(blob, target - blob.l, opts);
 	cell.val = str;
 	return cell;
 }
@@ -284,13 +310,15 @@ function parse_Format(blob, length, opts) {
 	var fmtstr = parse_XLUnicodeString2(blob, 0, opts);
 	return [ifmt, fmtstr];
 }
+var parse_BIFF2Format = parse_XLUnicodeString2;
 
 /* 2.4.90 */
-function parse_Dimensions(blob, length) {
-	var w = length === 10 ? 2 : 4;
-	var r = blob.read_shift(w), R = blob.read_shift(w),
-	    c = blob.read_shift(2), C = blob.read_shift(2);
-	blob.l += 2;
+function parse_Dimensions(blob, length, opts) {
+	var end = blob.l + length;
+	var w = opts.biff == 8 || !opts.biff ? 4 : 2;
+	var r = blob.read_shift(w), R = blob.read_shift(w);
+	var c = blob.read_shift(2), C = blob.read_shift(2);
+	blob.l = end;
 	return {s: {r:r, c:c}, e: {r:R, c:C}};
 }
 
@@ -307,32 +335,74 @@ function parse_MulRk(blob, length) {
 	var rw = blob.read_shift(2), col = blob.read_shift(2);
 	var rkrecs = [];
 	while(blob.l < target) rkrecs.push(parse_RkRec(blob));
-	if(blob.l !== target) throw "MulRK read error";
+	if(blob.l !== target) throw new Error("MulRK read error");
 	var lastcol = blob.read_shift(2);
-	if(rkrecs.length != lastcol - col + 1) throw "MulRK length mismatch";
+	if(rkrecs.length != lastcol - col + 1) throw new Error("MulRK length mismatch");
 	return {r:rw, c:col, C:lastcol, rkrec:rkrecs};
 }
+/* 2.4.174 */
+function parse_MulBlank(blob, length) {
+	var target = blob.l + length - 2;
+	var rw = blob.read_shift(2), col = blob.read_shift(2);
+	var ixfes = [];
+	while(blob.l < target) ixfes.push(blob.read_shift(2));
+	if(blob.l !== target) throw new Error("MulBlank read error");
+	var lastcol = blob.read_shift(2);
+	if(ixfes.length != lastcol - col + 1) throw new Error("MulBlank length mismatch");
+	return {r:rw, c:col, C:lastcol, ixfe:ixfes};
+}
 
-/* 2.5.20 2.5.249 TODO */
-function parse_CellStyleXF(blob, length, style) {
+/* 2.5.20 2.5.249 TODO: interpret values here */
+function parse_CellStyleXF(blob, length, style, opts) {
 	var o = {};
 	var a = blob.read_shift(4), b = blob.read_shift(4);
 	var c = blob.read_shift(4), d = blob.read_shift(2);
 	o.patternType = XLSFillPattern[c >> 26];
+
+	if(!opts.cellStyles) return o;
+	o.alc = a & 0x07;
+	o.fWrap = (a >> 3) & 0x01;
+	o.alcV = (a >> 4) & 0x07;
+	o.fJustLast = (a >> 7) & 0x01;
+	o.trot = (a >> 8) & 0xFF;
+	o.cIndent = (a >> 16) & 0x0F;
+	o.fShrinkToFit = (a >> 20) & 0x01;
+	o.iReadOrder = (a >> 22) & 0x02;
+	o.fAtrNum = (a >> 26) & 0x01;
+	o.fAtrFnt = (a >> 27) & 0x01;
+	o.fAtrAlc = (a >> 28) & 0x01;
+	o.fAtrBdr = (a >> 29) & 0x01;
+	o.fAtrPat = (a >> 30) & 0x01;
+	o.fAtrProt = (a >> 31) & 0x01;
+
+	o.dgLeft = b & 0x0F;
+	o.dgRight = (b >> 4) & 0x0F;
+	o.dgTop = (b >> 8) & 0x0F;
+	o.dgBottom = (b >> 12) & 0x0F;
+	o.icvLeft = (b >> 16) & 0x7F;
+	o.icvRight = (b >> 23) & 0x7F;
+	o.grbitDiag = (b >> 30) & 0x03;
+
+	o.icvTop = c & 0x7F;
+	o.icvBottom = (c >> 7) & 0x7F;
+	o.icvDiag = (c >> 14) & 0x7F;
+	o.dgDiag = (c >> 21) & 0x0F;
+
 	o.icvFore = d & 0x7F;
 	o.icvBack = (d >> 7) & 0x7F;
+	o.fsxButton = (d >> 14) & 0x01;
 	return o;
 }
-function parse_CellXF(blob, length) {return parse_CellStyleXF(blob,length,0);}
-function parse_StyleXF(blob, length) {return parse_CellStyleXF(blob,length,1);}
+function parse_CellXF(blob, length, opts) {return parse_CellStyleXF(blob,length,0, opts);}
+function parse_StyleXF(blob, length, opts) {return parse_CellStyleXF(blob,length,1, opts);}
 
 /* 2.4.353 TODO: actually do this right */
-function parse_XF(blob, length) {
+function parse_XF(blob, length, opts) {
 	var o = {};
 	o.ifnt = blob.read_shift(2); o.ifmt = blob.read_shift(2); o.flags = blob.read_shift(2);
 	o.fStyle = (o.flags >> 2) & 0x01;
 	length -= 6;
-	o.data = parse_CellStyleXF(blob, length, o.fStyle);
+	o.data = parse_CellStyleXF(blob, length, o.fStyle, opts);
 	return o;
 }
 
@@ -342,13 +412,14 @@ function parse_Guts(blob, length) {
 	var out = [blob.read_shift(2), blob.read_shift(2)];
 	if(out[0] !== 0) out[0]--;
 	if(out[1] !== 0) out[1]--;
-	if(out[0] > 7 || out[1] > 7) throw "Bad Gutters: " + out;
+	if(out[0] > 7 || out[1] > 7) throw new Error("Bad Gutters: " + out.join("|"));
 	return out;
 }
 
 /* 2.4.24 */
-function parse_BoolErr(blob, length) {
+function parse_BoolErr(blob, length, opts) {
 	var cell = parse_XLSCell(blob, 6);
+	if(opts.biff == 2) ++blob.l;
 	var val = parse_Bes(blob, 2);
 	cell.val = val;
 	cell.t = (val === true || val === false) ? 'b' : 'e';
@@ -381,7 +452,7 @@ function parse_SupBook(blob, length, opts) {
 function parse_ExternName(blob, length, opts) {
 	var flags = blob.read_shift(2);
 	var body;
-	var o = {
+	var o = ({
 		fBuiltIn: flags & 0x01,
 		fWantAdvise: (flags >>> 1) & 0x01,
 		fWantPict: (flags >>> 2) & 0x01,
@@ -389,29 +460,34 @@ function parse_ExternName(blob, length, opts) {
 		fOleLink: (flags >>> 4) & 0x01,
 		cf: (flags >>> 5) & 0x3FF,
 		fIcon: flags >>> 15 & 0x01
-	};
-	if(opts.sbcch === 0x3A01) body = parse_AddinUdf(blob, length-2);
+	}/*:any*/);
+	if(opts.sbcch === 0x3A01) body = parse_AddinUdf(blob, length-2, opts);
 	//else throw new Error("unsupported SupBook cch: " + opts.sbcch);
 	o.body = body || blob.read_shift(length-2);
+	if(typeof body === "string") o.Name = body;
 	return o;
 }
 
 /* 2.4.150 TODO */
 function parse_Lbl(blob, length, opts) {
-	if(opts.biff < 8) return parse_Label(blob, length, opts);
 	var target = blob.l + length;
 	var flags = blob.read_shift(2);
 	var chKey = blob.read_shift(1);
 	var cch = blob.read_shift(1);
-	var cce = blob.read_shift(2);
-	blob.l += 2;
-	var itab = blob.read_shift(2);
-	blob.l += 4;
+	var cce = blob.read_shift(opts && opts.biff == 2 ? 1 : 2);
+	var itab = 0;
+	if(!opts || opts.biff >= 5) {
+		blob.l += 2;
+		itab = blob.read_shift(2);
+		blob.l += 4;
+	}
 	var name = parse_XLUnicodeStringNoCch(blob, cch, opts);
-	var rgce = parse_NameParsedFormula(blob, target - blob.l, opts, cce);
+	var npflen = target - blob.l; if(opts && opts.biff == 2) --npflen;
+	var rgce = target == blob.l || cce == 0 ? [] : parse_NameParsedFormula(blob, npflen, opts, cce);
 	return {
 		chKey: chKey,
 		Name: name,
+		itab: itab,
 		rgce: rgce
 	};
 }
@@ -419,13 +495,21 @@ function parse_Lbl(blob, length, opts) {
 /* 2.4.106 TODO: verify supbook manipulation */
 function parse_ExternSheet(blob, length, opts) {
 	if(opts.biff < 8) return parse_ShortXLUnicodeString(blob, length, opts);
-	var o = parslurp2(blob,length,parse_XTI);
+	var o = [], target = blob.l + length, len = blob.read_shift(2);
+	while(len-- !== 0) o.push(parse_XTI(blob, 6));
+		// [iSupBook, itabFirst, itabLast];
 	var oo = [];
-	if(opts.sbcch === 0x0401) {
-		for(var i = 0; i != o.length; ++i) oo.push(opts.snames[o[i][1]]);
-		return oo;
-	}
-	else return o;
+	return o;
+}
+
+/* 2.4.176 TODO: check older biff */
+function parse_NameCmt(blob, length, opts) {
+	if(opts.biff < 8) { blob.l += length; return; }
+	var cchName = blob.read_shift(2);
+	var cchComment = blob.read_shift(2);
+	var name = parse_XLUnicodeStringNoCch(blob, cchName, opts);
+	var comment = parse_XLUnicodeStringNoCch(blob, cchComment, opts);
+	return [name, comment];
 }
 
 /* 2.4.260 */
@@ -440,7 +524,12 @@ function parse_ShrFmla(blob, length, opts) {
 /* 2.4.4 TODO */
 function parse_Array(blob, length, opts) {
 	var ref = parse_Ref(blob, 6);
-	blob.l += 6; length -= 12; /* TODO: fAlwaysCalc */
+	/* TODO: fAlwaysCalc */
+	switch(opts.biff) {
+		case 2: blob.l ++; length -= 7; break;
+		case 3: case 4: blob.l += 2; length -= 8; break;
+		default: blob.l += 6; length -= 12;
+	}
 	return [ref, parse_ArrayParsedFormula(blob, length, opts, ref)];
 }
 
@@ -477,15 +566,54 @@ function parse_MergeCells(blob, length) {
 }
 
 /* 2.4.181 TODO: parse all the things! */
-function parse_Obj(blob, length) {
+function parse_Obj(blob, length, opts) {
+	if(opts && opts.biff < 8) return parse_BIFF5Obj(blob, length, opts);
 	var cmo = parse_FtCmo(blob, 22); // id, ot, flags
 	var fts = parse_FtArray(blob, length-22, cmo[1]);
 	return { cmo: cmo, ft:fts };
+}
+/* from older spec */
+var parse_BIFF5OT = [];
+parse_BIFF5OT[0x08] = function(blob, length, opts) {
+	var tgt = blob.l + length;
+	blob.l += 10; // todo
+	var cf = blob.read_shift(2);
+	blob.l += 4;
+	var cbPictFmla = blob.read_shift(2);
+	blob.l += 2;
+	var grbit = blob.read_shift(2);
+	blob.l += 4;
+	var cchName = blob.read_shift(1);
+	blob.l += cchName; // TODO: stName
+	blob.l = tgt; // TODO: fmla
+	return { fmt:cf };
+};
+
+function parse_BIFF5Obj(blob, length, opts) {
+	var cnt = blob.read_shift(4);
+	var ot = blob.read_shift(2);
+	var id = blob.read_shift(2);
+	var grbit = blob.read_shift(2);
+	var colL = blob.read_shift(2);
+	var dxL = blob.read_shift(2);
+	var rwT = blob.read_shift(2);
+	var dyT = blob.read_shift(2);
+	var colR = blob.read_shift(2);
+	var dxR = blob.read_shift(2);
+	var rwB = blob.read_shift(2);
+	var dyB = blob.read_shift(2);
+	var cbMacro = blob.read_shift(2);
+	blob.l += 6;
+	length -= 36;
+	var fts = [];
+	fts.push((parse_BIFF5OT[ot]||parsenoop)(blob, length, opts));
+	return { cmo: [id, ot, grbit], ft:fts };
 }
 
 /* 2.4.329 TODO: parse properly */
 function parse_TxO(blob, length, opts) {
 	var s = blob.l;
+	var texts = "";
 try {
 	blob.l += 4;
 	var ot = (opts.lastobj||{cmo:[0,0]}).cmo[1];
@@ -499,16 +627,15 @@ try {
 	blob.l += len;
 	//var fmla = parse_ObjFmla(blob, s + length - blob.l);
 
-	var texts = "";
 	for(var i = 1; i < blob.lens.length-1; ++i) {
-		if(blob.l-s != blob.lens[i]) throw "TxO: bad continue record";
+		if(blob.l-s != blob.lens[i]) throw new Error("TxO: bad continue record");
 		var hdr = blob[blob.l];
 		var t = parse_XLUnicodeStringNoCch(blob, blob.lens[i+1]-blob.lens[i]-1);
 		texts += t;
 		if(texts.length >= (hdr ? cchText : 2*cchText)) break;
 	}
 	if(texts.length !== cchText && texts.length !== cchText*2) {
-		throw "cchText: " + cchText + " != " + texts.length;
+		throw new Error("cchText: " + cchText + " != " + texts.length);
 	}
 
 	blob.l = s + length;
@@ -516,11 +643,11 @@ try {
 //	var rgTxoRuns = [];
 //	for(var j = 0; j != cbRuns/8-1; ++j) blob.l += 8;
 //	var cchText2 = blob.read_shift(2);
-//	if(cchText2 !== cchText) throw "TxOLastRun mismatch: " + cchText2 + " " + cchText;
+//	if(cchText2 !== cchText) throw new Error("TxOLastRun mismatch: " + cchText2 + " " + cchText);
 //	blob.l += 6;
-//	if(s + length != blob.l) throw "TxO " + (s + length) + ", at " + blob.l;
+//	if(s + length != blob.l) throw new Error("TxO " + (s + length) + ", at " + blob.l);
 	return { t: texts };
-} catch(e) { blob.l = s + length; return { t: texts||"" }; }
+} catch(e) { blob.l = s + length; return { t: texts }; }
 }
 
 /* 2.4.140 */
@@ -574,14 +701,43 @@ function parse_XFCRC(blob, length) {
 	return o;
 }
 
+/* 2.4.53 TODO: parse flags */
+/* [MS-XLSB] 2.4.323 TODO: parse flags */
+function parse_ColInfo(blob, length, opts) {
+	if(!opts.cellStyles) return parsenoop(blob, length);
+	var w = opts && opts.biff >= 12 ? 4 : 2;
+	var colFirst = blob.read_shift(w);
+	var colLast = blob.read_shift(w);
+	var coldx = blob.read_shift(w);
+	var ixfe = blob.read_shift(w);
+	var flags = blob.read_shift(2);
+	if(w == 2) blob.l += 2;
+	return {s:colFirst, e:colLast, w:coldx, ixfe:ixfe, flags:flags};
+}
+
+/* 2.4.257 */
+function parse_Setup(blob, length, opts) {
+	var o = {};
+	blob.l += 16;
+	o.header = parse_Xnum(blob, 8);
+	o.footer = parse_Xnum(blob, 8);
+	blob.l += 2;
+	return o;
+}
+
+/* 2.4.261 */
+function parse_ShtProps(blob, length, opts) {
+	var def = {area:false};
+	if(opts.biff != 5) { blob.l += length; return def; }
+	var d = blob.read_shift(1); blob.l += 3;
+	if((d & 0x10)) def.area = true;
+	return def;
+}
 
 var parse_Style = parsenoop;
 var parse_StyleExt = parsenoop;
 
-var parse_ColInfo = parsenoop;
-
 var parse_Window2 = parsenoop;
-
 
 var parse_Backup = parsebool; /* 2.4.14 */
 var parse_Blank = parse_XLSCell; /* 2.4.20 Just the cell */
@@ -659,7 +815,6 @@ var parse_FnGroupName = parsenoop;
 var parse_FilterMode = parsenoop;
 var parse_AutoFilterInfo = parsenoop;
 var parse_AutoFilter = parsenoop;
-var parse_Setup = parsenoop;
 var parse_ScenMan = parsenoop;
 var parse_SCENARIO = parsenoop;
 var parse_SxView = parsenoop;
@@ -670,7 +825,6 @@ var parse_SXLI = parsenoop;
 var parse_SXPI = parsenoop;
 var parse_DocRoute = parsenoop;
 var parse_RecipName = parsenoop;
-var parse_MulBlank = parsenoop;
 var parse_SXDI = parsenoop;
 var parse_SXDB = parsenoop;
 var parse_SXFDB = parsenoop;
@@ -816,7 +970,6 @@ var parse_TableStyles = parsenoop;
 var parse_TableStyle = parsenoop;
 var parse_TableStyleElement = parsenoop;
 var parse_NamePublish = parsenoop;
-var parse_NameCmt = parsenoop;
 var parse_SortData = parsenoop;
 var parse_GUIDTypeLib = parsenoop;
 var parse_FnGrp12 = parsenoop;
@@ -869,7 +1022,6 @@ var parse_Surf = parsenoop;
 var parse_RadarArea = parsenoop;
 var parse_AxisParent = parsenoop;
 var parse_LegendException = parsenoop;
-var parse_ShtProps = parsenoop;
 var parse_SerToCrt = parsenoop;
 var parse_AxesUsed = parsenoop;
 var parse_SBaseRef = parsenoop;
@@ -893,6 +1045,16 @@ var parse_BopPopCustom = parsenoop;
 var parse_Fbi2 = parsenoop;
 
 /* --- Specific to versions before BIFF8 --- */
+function parse_ImData(blob, length, opts) {
+	var tgt = blob.l + length;
+	var cf = blob.read_shift(2);
+	var env = blob.read_shift(2);
+	var lcb = blob.read_shift(4);
+	var o = {fmt:cf, env:env, len:lcb, data:blob.slice(blob.l,blob.l+lcb)};
+	blob.l += lcb;
+	return o;
+}
+
 function parse_BIFF5String(blob) {
 	var len = blob.read_shift(1);
 	return blob.read_shift(len, 'sbcs-cont');
@@ -903,6 +1065,7 @@ function parse_BIFF2STR(blob, length, opts) {
 	var cell = parse_XLSCell(blob, 6);
 	++blob.l;
 	var str = parse_XLUnicodeString2(blob, length-7, opts);
+	cell.t = 'str';
 	cell.val = str;
 	return cell;
 }
@@ -911,7 +1074,44 @@ function parse_BIFF2NUM(blob, length, opts) {
 	var cell = parse_XLSCell(blob, 6);
 	++blob.l;
 	var num = parse_Xnum(blob, 8);
+	cell.t = 'n';
 	cell.val = num;
 	return cell;
 }
 
+function parse_BIFF2INT(blob, length) {
+	var cell = parse_XLSCell(blob, 6);
+	++blob.l;
+	var num = blob.read_shift(2);
+	cell.t = 'n';
+	cell.val = num;
+	return cell;
+}
+
+function parse_BIFF2STRING(blob, length) {
+	var cch = blob.read_shift(1);
+	if(cch === 0) { blob.l++; return ""; }
+	return blob.read_shift(cch, 'sbcs-cont');
+}
+
+/* TODO: convert to BIFF8 font struct */
+function parse_BIFF2FONTXTRA(blob, length) {
+	blob.l += 6; // unknown
+	blob.l += 2; // font weight "bls"
+	blob.l += 1; // charset
+	blob.l += 3; // unknown
+	blob.l += 1; // font family
+	blob.l += length - 13;
+}
+
+/* TODO: parse rich text runs */
+function parse_RString(blob, length, opts) {
+	var end = blob.l + length;
+	var cell = parse_XLSCell(blob, 6);
+	var cch = blob.read_shift(2);
+	var str = parse_XLUnicodeStringNoCch(blob, cch, opts);
+	blob.l = end;
+	cell.t = 'str';
+	cell.val = str;
+	return cell;
+}

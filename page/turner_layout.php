@@ -29,7 +29,7 @@
 	
 	function form_turner_create_show() {
 		$('#form_turner_create')[0].reset();	
-		dialog_create($('#form_turner_create')[0])
+		dialog_create($('#form_turner_create')[0],null,false)
 	}
 
 	function form_turner_create_submit(data) {

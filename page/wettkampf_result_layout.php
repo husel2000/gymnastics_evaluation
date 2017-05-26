@@ -48,16 +48,19 @@
 				$("#form_wettkampf_result_save > [name='wert_ausgang']").val($('#id_wert_ausgang_'+id).val());
 				$("#form_wettkampf_result_save > [name='wert_abzug']").val($('#id_wert_abzug_'+id).val());
 				
-			} else dialog_create("Unbekanntes Feld Editiert. Abbruc");
-		}else if(wettkampf_details.system = "turn") {
+			} else dialog_create("Unbekanntes Feld Editiert. Abbruch");
+		}else if(wettkampf_details.system == "turn") {
 			if(ele.id.indexOf("ausgang")>= 0 || ele.id.indexOf("abzug")>= 0) {
-				if(parseFloat($('#id_wert_ausgang_'+id).val()) > 0)
+				if(parseFloat($('#id_wert_ausgang_'+id).val()) > 0) {
 					$("#form_wettkampf_result_save > [name='wert_ausgang']").val(10 + parseFloat($('#id_wert_ausgang_'+id).val()));
-				else
+				  $("#form_wettkampf_result_save > [name='wert_abzug']").val(10 - parseFloat($('#id_wert_abzug_'+id).val()));
+				} else {
 					$("#form_wettkampf_result_save > [name='wert_ausgang']").val(0);
+					$("#form_wettkampf_result_save > [name='wert_abzug']").val(0);
+				}
 					
-				$("#form_wettkampf_result_save > [name='wert_abzug']").val(10 - parseFloat($('#id_wert_abzug_'+id).val()));
-			}else dialog_create("Unbekanntes Feld Editiert. Abbruc");
+				
+			}else dialog_create("Unbekanntes Feld Editiert. Abbruch");
 		}else {
 			dialog_create("Für das Turnsystem " + wettkampf_details.system + " kann keine Berechnung gefunden werden");
 			return;
@@ -84,10 +87,13 @@
 					value_ausgang = data[i].geraet[j].wert_ausgang;
 					value_abzug = data[i].geraet[j].wert_abzug;
 					value_gesamt = value_ausgang - value_abzug
-				}else if(wettkampf_details.system = "turn") {
-					value_ausgang = data[i].geraet[j].wert_ausgang-10;
-					value_abzug = 10-data[i].geraet[j].wert_abzug;
-					value_gesamt = value_ausgang + value_abzug;
+				}else if(wettkampf_details.system == "turn" ) {
+				  value_ausgang = 0; value_abzug = 0; value_gesamt = 0;
+				  if(data[i].geraet[j].wert_ausgang > 0) {
+					  value_ausgang = data[i].geraet[j].wert_ausgang-10;
+					  value_abzug = 10-data[i].geraet[j].wert_abzug;
+					  value_gesamt = value_ausgang + value_abzug;
+				  }
 				}else {
 					dialog_create("Für das Turnsystem " + wettkampf_details.system + " kann keine Berechnung gefunden werden");
 					return;
@@ -164,7 +170,7 @@
 					found = true;
 				}
 			});
-			if(!found) dialog_create(nachname + ", " + vorname + " ist nocht nicht als Turner angelegt!");
+			if(!found) dialog_create(nachname + ", " + vorname + " ist noch nicht als Turner angelegt!");
 		});
 
 		dialog_close('#turner_xls_columns')
@@ -174,10 +180,9 @@
 	function form_get_details_submit(data) {
 		wettkampf_details = data;
 		$('h1').children().first().html(wettkampf_details.bezeichnung);
-		
 		if(wettkampf_details.system == "p" || wettkampf_details.system == "lk") {
 			$('span[name="titel_column"]').html("(Ausgang - Abzug - Ergebnis)");
-		}else if(wettkampf_details.system = "turn") {
+		}else if(wettkampf_details.system == "turn") {
 	    $('span[name="titel_column"]').html("(A-Note - B-Note - Ergebnis)");
 		}else {
 			dialog_create("Das Turnsystem " + wettkampf_details.system + " ist unbekannt");
@@ -262,14 +267,14 @@
 			if(empty($id_riegenliste)) {
 				$res = db_select("Select bezeichnung from wettkampf_geraet where id_wettkampf = ? order by reihenfolge",$id_wettkampf);
 				foreach($res As $row) {
-					echo "<td>" . $row[0] . " (Ausgang - Abzug - Ergebnis)</td>\r\n";
+					echo "<td>" . $row[0] . " <span name=\"titel_column\">(Ausgang - Abzug - Ergebnis)</span></td>\r\n";
 				}
 			}else{
 				//Alle Wettkämpfe...
 				$res = db_select("Select id_wettkampf from riegenliste_wettkampf where id_riegenliste = ?",$id_riegenliste);
 				$geraete = db_select("Select bezeichnung From wettkampf_geraet where id_wettkampf = ? Order by reihenfolge",$res[0][0]);
 				foreach($geraete As $geraet) {
-					echo "<td>" . $geraet[0] . "<span name=\"titel_column\">(Ausgang - Abzug - Ergebnis)</span></td>\r\n";
+					echo "<td>" . $geraet[0] . " <span name=\"titel_column\">(Ausgang - Abzug - Ergebnis)</span></td>\r\n";
 				}
 			}
 			?>

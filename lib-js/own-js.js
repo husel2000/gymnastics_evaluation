@@ -300,7 +300,7 @@ function findHighestZIndex(elem) {
 
 //Erzeugt ein Popup-Dialog
 function dialog_create(obj,callback_close,remove) {
-  if(remove == "") remove = true;
+  if(is_null(remove)) remove = true;
 	//Popup
 	var divBackground = $('<div />', {class: "popup"});
 	//Close-Button

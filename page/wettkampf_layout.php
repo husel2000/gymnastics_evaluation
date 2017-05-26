@@ -64,31 +64,6 @@
 		dialog_create($('<div />', {html: text})[0]);
 	}
 	
-	function form_special_result_collect_export_submit(data) {
-		if(anz_curr != anz_target) return //Continue if all results are ready
-		alert("Ready");
-	}
-	function function_special_result_collect_export() {
-		if($('#id_select_wettkampf').val() == null) {
-			dialog_create("Mindestens 1 Wettkampf auswählen");
-			return;
-		}
-		
-		//Ergebnisse für einzelnen Wettkämpfe anfragen
-		result_all = [];
-		anz_target = $('#id_select_wettkampf').val().length;
-		anz_curr = 0;
-		for(var i = 0; i < $('#id_select_wettkampf').val().length ; i++){
-			form = $('<form />', { method:"POST", action: "<?php echo Nav::_link_create_ajax("wettkampf_finish") ?>", id: "form_special_result_collect_export"}).append(
-				$('<input />', {type: "hidden", name: "action", value: "finish"})
-			).append(
-				$('<input />', {type: "hidden", name: "id_wettkampf", value: $('#id_select_wettkampf').val()[i]})	
-			)
-			create_ajax_form(form);
-			form.submit();
-		}
-	}
-	
 	function function_special_result_collect_area() {
 		if($('#id_select_wettkampf').val() == null) {
 			dialog_create("Mindestens 1 Wettkampf auswählen");
@@ -146,8 +121,6 @@
 		dialog_close("form_special_select",null,true)
 		if($('#id_select_special').val() == "result_collect_area") {
 			function_special_select_wettkampf(function_special_result_collect_area)
-		}else if($('#id_select_special').val() == "result_collect_export") {
-			function_special_select_wettkampf(function_special_result_collect_export)
 		}
 	}
 	
@@ -159,8 +132,6 @@
 				$('<div />', { class: "col-sm-10"}).append(
 					$('<select />', { id: "id_select_special", class:"form-control" }).append(
 						$('<option />', { text:"Sammelauswertung Bereich", value: "result_collect_area"})
-					).append(
-						$('<option />', { text:"Sammelexport", value: "result_collect_export"})	
 					)
 				)
 			).append(
@@ -173,7 +144,6 @@
 				)
 			)
 		);
-		
 		dialog_create(form[0]);
 	}
 	function changeWettkampfTyp(ele) {
@@ -192,6 +162,7 @@
 	}
 	
 	function form_wettkampf_create_show() {
+	  
 		$('#form_wettkampf_create')[0].reset();
 		$("input[name=create_geraet\\[\\]").each(function() {form_wettkampf_create_geraet_change(this)});	
 		dialog_create($('#form_wettkampf_create')[0],null,false)
