@@ -124,7 +124,6 @@ if(isset($_GET['geraete']) && is_array($_GET['geraete'])) $geraete = $_GET['gera
       $(".pagebreak").css("page-break-after","auto");
       
       var anz = Math.round(26 / $("[name='input_kari']").length)
-      console.log(anz);
       
       $(".table_wertung").each(function() {
         var ele = $(this).find(".tr_kari_page").each(function(index_page) {
@@ -159,7 +158,8 @@ if(isset($_GET['geraete']) && is_array($_GET['geraete'])) $geraete = $_GET['gera
 	      $sql = "Select distinct Bezeichnung from wettkampf_geraet where id_wettkampf In (Select id_wettkampf From riegenliste_wettkampf where id_riegenliste = ?)";
 	      $res = db_select($sql,$id_riegenliste);
 	      for($i = 0; $i < sizeof($res); $i++) {
-          echo '<div><input type="checkbox" class="input_geraet" value="' . $res[$i][0] . '" onchange="geraet_show_change(this)">' . $res[$i][0] . '</div>';
+	        $name = str_replace("/","-",str_replace(" ","",$res[$i][0]));
+          echo '<div><input type="checkbox" class="input_geraet" value="' . $name . '" onchange="geraet_show_change(this)">' . $name . '</div>';
 	      } ?>
       </div>
       <div>

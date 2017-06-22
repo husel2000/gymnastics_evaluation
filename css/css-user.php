@@ -66,6 +66,7 @@ require_once("../config.php");
 	height:1.5em;
 	background-image:url(<?php echo URIIMAGES . "arrow-down.png"; ?>);
 	background-color: Transparent;
+	border: none;
 }
 
 .input_range {
