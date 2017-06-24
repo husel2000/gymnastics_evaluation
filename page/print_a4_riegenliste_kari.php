@@ -17,7 +17,7 @@ $geraete=Array("Boden");
 if(isset($_GET['geraete']) && is_array($_GET['geraete'])) $geraete = $_GET['geraete'];
 
 ?><!DOCTYPE html>
-<html>
+<html moznomarginboxes mozdisallowselectionprint>
 	<head>
 	  <title></title>
   <link href="../css/css-user.php"  rel="stylesheet"> <!-- JQuery UI -->
@@ -68,6 +68,7 @@ if(isset($_GET['geraete']) && is_array($_GET['geraete'])) $geraete = $_GET['gera
         if($(this).is(':checked')) {
           var myNew = $("#template").clone().show();
           myNew.addClass("geraet_tmp")
+          myNew.addClass("print")
           myNew.attr('id',"id_geraet_" + $(this).val())
           myNew.find(".geraet_name").html($(this).val());
           myNew.find(".tr_kari").addClass("tr_kari_page");
@@ -174,7 +175,7 @@ if(isset($_GET['geraete']) && is_array($_GET['geraete'])) $geraete = $_GET['gera
     </div>
 	  
 	  <!-- Template für Riege und Gerät anlegen -->
-	  <span id="template" style="display:none">
+	  <span id="template" class="print" style="display:none">
     <?php
       $id_riegenliste = $_GET['id_riegenliste'];
       $res = db_select("Select riegentext from riegenliste where id_riegenliste = ?",$id_riegenliste);

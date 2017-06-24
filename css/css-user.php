@@ -88,7 +88,7 @@ body .print {
   width: 21cm;
   height: 28.5cm;
   padding: 0;
-  margin: 0.5cm auto;
+  margin: 0.5cm;
   border: 1px red solid;
   border-radius: 1px;
   background: white;
@@ -101,11 +101,10 @@ body .print {
 
 @page {
   size: A4;
-  margin: 0;
+  margin: 0.5cm;
 }
 @media print {
   .print .page {
-    margin: 0;
     border: initial;
     border-radius: initial;
     width: initial;
