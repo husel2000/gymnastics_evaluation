@@ -1,22 +1,60 @@
 <script type="text/javascript">
-	function turner_is_double(vorname,nachname) {
+  function function_special_show() {
+		form = $('<form />', { id: "form_special_select", submit: function(event) { event.preventDefault(); return false } , class: "form-horizontal", role: "form"}).append(
+			$('<div />', { class: "form-group" }).append(
+				$('<label />', { class: "control-label col-sm-2", for: "id_input_special", text:"Funktion"})
+			).append(
+				$('<div />', { class: "col-sm-10"}).append(
+					$('<select />', { id: "id_select_special", class:"form-control" }).append(
+						$('<option />', { text:"Suche Duplikate", value: "result_find_duplicate"})
+					)
+				)
+			).append(
+				$('<div />', { class: "form-group"}).append(
+					$('<div />', {class: "col-sm-offset-2 col-sm-10"}).append (
+						$('<button />', { class: "btn btn-default", text:"Ausführen",
+						click: function_special_work
+						})	
+					)
+				)
+			)
+		);
+		dialog_create(form[0]);
+	}
+	function function_special_work() { 
+		dialog_close("#form_special_select",null,true)
+		var list = "";
+		if($('#id_select_special').val() == "result_find_duplicate") {
+		  var table_row = $("#turner_table_list").DataTable().rows().data();
+		  for(var i = 0; i < table_row.length / 2; i++) {
+		    var data = table_row[i];
+		    if(turner_is_double(data[2],data[1],i+1)) {
+	        list += "<div>" + data[1] + " " + data[2] + "</div>";
+	        
+		    }
+		  }
+		}
+		if(list != "") {
+		  dialog_create($("<div />").html(list)[0]);
+		}
+	}
+	
+	function turner_is_double(vorname,nachname,row_beginn) {
 		is_double = false;
-		
+		if(row_beginn == null || row_beginn === undefined) row_beginn = 0;
+
 		soundex_nachname = soundex(nachname);
 		soundex_vorname = soundex(vorname);
-		$("tbody > tr").each(function(i,ele){ 
-			if(soundex($(ele).find("td:eq(1)").text()) === soundex_nachname) {
-				if(soundex($(ele).find("td:eq(2)").text()) === soundex_vorname) {	
-					is_double = true;	
-				}
-			}
-			//Save, if Something with Soundex is Wrong
-			/*if($(ele).html().toUpperCase().indexOf("" +vorname.toUpperCase() + "") != -1) {
-				if($(ele).html().toUpperCase().indexOf("" + nachname.toUpperCase() + "") != -1) {
-					is_double = true;
-				}
-			}*/
-		});
+
+		$("#turner_table_list").DataTable().rows().every(function ( rowIdx, tableLoop, rowLoop ) {
+		  if(row_beginn <= rowIdx) {
+        var data = this.data();
+        if((soundex(data[1]) === soundex_nachname && soundex(data[2]) === soundex_vorname) ||
+          (soundex(data[2]) === soundex_nachname && soundex(data[1]) === soundex_vorname)) {
+  				is_double = true;	
+  			}
+		  }
+    } );
 		return is_double;
 	}
 
@@ -73,6 +111,7 @@
 			$('#form_turner_create').find("[name='vorname']").val(ele.vorname)
 			$('#form_turner_create').find("[name='verein']").val(ele.verein)
 			$('#form_turner_create').find("[name='geschlecht']").val(ele.geschlecht)
+
 			if(typeof(ele.geburtsdatum) !== "undefined") {
 				if(ele.geburtsdatum.match(/[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4}/)) {
 					var arr = ele.geburtsdatum.split("/"); 
@@ -92,6 +131,7 @@
 				}
 				
 			}
+			console.log("Geb:" + ele.geburtsdatum);
 			$('#form_turner_create').find("[name='geburtsdatum']").val(ele.geburtsdatum)
 			$('#form_turner_create').find("[name='pass']").val(ele.pass)
 			$('#form_turner_create').find("[name='pass_gueltig']").val(ele.pass_gueltig)
@@ -151,7 +191,7 @@
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="create_geburtsdatum">Geburtsdatum</label>
 			<div class="col-sm-10">
-				<input type="date" class="form-control input_date" id="create_geburtsdatum" name="geburtsdatum" placeholder="dd.mm.yyyy">
+				<input type="text" class="form-control input_date" id="create_geburtsdatum" name="geburtsdatum" placeholder="dd.mm.yyyy">
 			</div>
 		</div>
 		<div class="form-group">
@@ -177,6 +217,7 @@
 <h1><span class="label label-default">Turner</span></h1>
 <button type="button" class="btn btn-default" onclick="form_turner_create_show()">Neuen Turner anlegen</button>
 <button type="button" class="btn btn-default" onclick="user_import_xls_start(['nachname','vorname','geschlecht','verein','geburtsdatum','pass','pass_gueltig'],user_import_xls_finish)">Import</button>
+<button type="button" class="btn btn-default" onclick="function_special_show()">Sonderfunktionen</button>
 <table data-formid="form_turner_edit_value" class="table_data_edit" id="turner_table_list" data-paging="true">
 	<thead>
 		<tr>

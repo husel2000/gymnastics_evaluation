@@ -75,6 +75,7 @@
 	}
 
 	function form_wettkampf_result_reload_submit(data) {
+	  console.log("Reload");
 		var t = $("#wettkampf_turner_result_table").DataTable();
 		t.clear().draw();
 		for(var i = 0; i < data.length; i++) {		
@@ -196,7 +197,7 @@
 	  
 		$("#wettkampf_turner_result_table").DataTable( {
 			paging: false,
-			"columnDefs": [ { "width": "10em", "targets": 0 } ]
+			"columnDefs": [ { "width": "10em", "targets": 0 },{ "width": "3em", "targets": 1 } ]
 		});
 		//Details zum Wettkampf ermitteln
 		form = $('<form />', { method:"POST", action: "<?php echo Nav::_link_create_ajax("wettkampf") ?>", id: "form_get_details"}).append(

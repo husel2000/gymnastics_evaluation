@@ -64,6 +64,23 @@
 		dialog_create($('<div />', {html: text})[0]);
 	}
 	
+	
+	function function_special_result_collect_results() {
+		if($('#id_select_wettkampf').val() == null) {
+			dialog_create("Mindestens 1 Wettkampf auswählen");
+			return;
+		}
+		
+		//Ergebnisse für einzelnen Wettkämpfe anfragen
+		result_all = [];
+		anz_target = $('#id_select_wettkampf').val().length;
+		
+		console.log($('#id_select_wettkampf').val().join(","))
+		
+		window.location="<?php echo Nav::_link_create("wettkampf_finish") ?>&id_wettkampf=" + $('#id_select_wettkampf').val().join(",");
+	}
+	
+	
 	function function_special_result_collect_area() {
 		if($('#id_select_wettkampf').val() == null) {
 			dialog_create("Mindestens 1 Wettkampf auswählen");
@@ -121,6 +138,8 @@
 		dialog_close("form_special_select",null,true)
 		if($('#id_select_special').val() == "result_collect_area") {
 			function_special_select_wettkampf(function_special_result_collect_area)
+		}else if($('#id_select_special').val() == "result_collect_results") {
+			function_special_select_wettkampf(function_special_result_collect_results)
 		}
 	}
 	
@@ -132,7 +151,9 @@
 				$('<div />', { class: "col-sm-10"}).append(
 					$('<select />', { id: "id_select_special", class:"form-control" }).append(
 						$('<option />', { text:"Sammelauswertung Bereich", value: "result_collect_area"})
-					)
+					).append(
+					  $('<option />', { text:"Sammelauswertung Ergebnisse", value: "result_collect_results"})  
+				  )
 				)
 			).append(
 				$('<div />', { class: "form-group"}).append(
@@ -232,13 +253,13 @@
 		<div class="form-group">
 			<label class = "control-label col-sm-2" for="create_date">Datum</label>
 			<div class="col-sm-10">
-				<input type="date" id="create_date" class="form-control input_date" name="create_date" placeholder="DD.MM.YYYY">
+				<input type="text" id="create_date" class="form-control input_date" name="create_date" placeholder="DD.MM.YYYY">
 			</div>
 		</div>
 		<div class="form-group">
 			<label class = "control-label col-sm-2" for="create_name">Name</label>
 			<div class="col-sm-10">
-				<input type="date" class="form-control" id="create_name" name="create_name" placeholder="Wettkampfnr. & Beschreibung">
+				<input type="text" class="form-control" id="create_name" name="create_name" placeholder="Wettkampfnr. & Beschreibung">
 			</div>
 		</div>
 		<div class="form-group" >

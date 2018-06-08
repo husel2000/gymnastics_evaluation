@@ -63,7 +63,6 @@ if(empty($_POST['action'])) {
 		$error_text = "Vorname, Nachname, Verein, Geschlecht und Geburtsdatum sind Pflichtfelder";
 		
 	}
-	
 	if($error == false) {
 		$sql = "INSERT INTO turner(name,vorname,geschlecht,verein,geburtsdatum,pass,pass_gueltig) VALUES(?,?,?,?,STR_TO_DATE(?,'%d.%m.%Y'),?,STR_TO_DATE(?,'%d.%m.%Y'))";
 		$res = db_select($sql,$name,$vorname,$geschlecht,$verein,$geburtsdatum,$pass,$pass_gueltig);

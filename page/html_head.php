@@ -67,5 +67,5 @@
 		</div>
 		<!-- /.container-fluid -->
 	</nav>
-	<div class="container">
+	<div class="container" style="width:100%">
 	
