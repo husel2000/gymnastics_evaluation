@@ -94,11 +94,11 @@ if(empty($_POST['action'])) {
 	$id_riegenliste = $_POST['id_riegenliste'];
 	$id_wettkaempfe = Array();
 	$sql_turner = "Select t1.id_turner,name,vorname,verein, r1.riege_no, r1.reihenfolge From turner t1 ".
-			"LEFT JOIN riegenliste_liste r1 ON(r1.id_wettkampf = ? and r1.id_turner = t1.id_turner) " .
+			"LEFT JOIN riegenliste_liste r1 ON(r1.id_riegenliste = ? and r1.id_wettkampf = ? and r1.id_turner = t1.id_turner) " .
 			"Where t1.id_turner IN (" .
 			"Select distinct id_turner From wettkampf_geraet_turner Where id_wettkampf_geraet IN (".
 			"Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = ?".
-			"))";
+			"))"; //04.06.2019 - r1.id_riegenliste = ? hinzugefügt
 	$sql_turner_geraet = "Select id_wettkampf_geraet_turner,id_wettkampf_geraet,wert_ausgang,wert_abzug From wettkampf_geraet_turner where id_turner = ? and id_wettkampf_geraet in ".
 			"(Select id_wettkampf_geraet From wettkampf_geraet where id_wettkampf = ?)";
 	//28.06.2016 - Ma.Weber
@@ -136,7 +136,7 @@ if(empty($_POST['action'])) {
 		foreach($geraet As $key => $arr) {
 			if(empty($key_master)) $key_master = $key;
 			if($geraet[$key] !== $geraet[$key_master]) {
-				$error = true; $error_text = "Für diese Riege können keine Ergebnisse zusammen erfasst werden.";
+				$error = true; $error_text = "Für diese Riege können keine Ergebnisse zusammen erfasst werden.\r\n" . json_encode($geraet[$key]). " - " . json_encode($geraet[$key_master]);
 				$wettkampf_bez = db_select("Select bezeichnung from wettkampf where id_wettkampf = ?",$key)[0][0];
 				$wettkampf_bez2= db_select("Select bezeichnung from wettkampf where id_wettkampf = ?",$key_master)[0][0];
 				$error_text .= " $wettkampf_bez - $wettkampf_bez2";
@@ -149,7 +149,7 @@ if(empty($_POST['action'])) {
 	
 	$data = Array();
 	foreach($id_wettkaempfe As $id_wettkampf) { 
-		$turner = db_select($sql_turner,$id_wettkampf,$id_wettkampf);
+		$turner = db_select($sql_turner,$id_riegenliste,$id_wettkampf,$id_wettkampf);
 		foreach($turner As $row) {
 			$turner = Array();
 			$turner['id_turner'] = $row[0];

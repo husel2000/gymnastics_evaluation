@@ -39,8 +39,10 @@
 		
 		$("#form_wettkampf_result_save > [name='id_wettkampf_geraet_turner']").val(id);
 		
-		var wert_ausgang = $('#id_wert_ausgang_'+id).val();
-		var wert_abzug = $('#id_wert_abzug_'+id).val();
+		var wert_ausgang = $('#id_wert_ausgang_'+id).val().replace(",",".");
+		var wert_abzug = $('#id_wert_abzug_'+id).val().replace(",",".");
+		if(!$.isNumeric(wert_ausgang) || !$.isNumeric(wert_abzug)) { dialog_create("Die Eingabe ist keine gültige Zahl! Bitte prüfen!") }
+
 		$('#id_wert_gesamt_'+id).val(0);
 		
 		if(wettkampf_details.system == "p" || wettkampf_details.system == "lk") {
@@ -118,7 +120,7 @@
 		    		min: 0,
 		    		max: 20,
 		    		onchange: 'wettkampf_result_edit(this)',
-		    		value: value_abzug
+		    		value: value_abzug,
 				}));
 				div.append($('<input/>', {
 					type: 'number',	disabled: true, step: '0.05',					
@@ -140,6 +142,26 @@
 			arr_col[data[i].geraet.length+2]  = div.html(); 		
 			t.row.add(arr_col).draw();
 		}
+		$("input[name='wert_abzug'],input[name='wert_ausgang']").focusin(function() { if($(this).val() == "0") $(this).val(""); }) //18.06.2018 - Ma.Weber
+		$("input[name='wert_abzug'],input[name='wert_ausgang']").focusout(function() { if($(this).val() == "") $(this).val("0"); }) //18.06.2018 - Ma.Weber
+		
+		//18.06.2018 - Ma.Weber - Tabindex
+		var data = $("#wettkampf_turner_result_table").DataTable().rows().data();
+		var tab_index = 1;
+		if(data.length > 0) {
+		  for(var j = 2; j < data[0].length -1 ; j++) { //Jede Spalte
+		    for(var i = 0; i < data.length; i++) { //Jede Zeile  
+		      var test = data[i][j].match(/id_wert_ausgang_(.*?)\"/);
+  		    if(test != null && test.length > 1) {
+  		      console.log($("#id_wert_ausgang_" + test[1]));
+  		      $("#id_wert_ausgang_" + test[1]).attr("tabindex",tab_index++);
+  		      $("#id_wert_abzug_" + test[1]).attr("tabindex",tab_index++);
+  		      //console.log(test[1]);
+  		    }
+		    }
+		  }
+		}
+    console.log("Tab_iindex: " + tab_index);
 		css_design_button();		
 	}
 
@@ -197,6 +219,7 @@
 	  
 		$("#wettkampf_turner_result_table").DataTable( {
 			paging: false,
+			"order": [[ 1, "asc" ]], //04.06.2019 - Sortierung für Tabs
 			"columnDefs": [ { "width": "10em", "targets": 0 },{ "width": "3em", "targets": 1 } ]
 		});
 		//Details zum Wettkampf ermitteln

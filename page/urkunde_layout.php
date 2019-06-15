@@ -71,6 +71,12 @@
   	editor.addMenuItem('PlatzhalterPunkte', {
     	text: 'Platzhalter Punkte',onclick: function() {editor.insertContent("%%punkte%%");},context: 'insert'
   	});
+  	editor.addMenuItem('PlatzhalterTemp1', {
+    	text: 'Platzhalter Temp1',onclick: function() {editor.insertContent("%%tmp1%%");},context: 'insert'
+  	});
+  	editor.addMenuItem('PlatzhalterTemp2', {
+    	text: 'Platzhalter Temp2',onclick: function() {editor.insertContent("%%tmp2%%");},context: 'insert'
+  	});
     	editor.addMenuItem('background', {
       text: 'Hintergrund',
         onclick: function() {

@@ -21,7 +21,7 @@ function create_ajax_form(the_form) {
 						dialog_create(result.error_text);
 					}else {
 						try { window[callback](result.data); } //Callback 
-						catch(err) { dialog_create("Can not call Callback " + callback + "<br>" + err); }
+						catch(err) { dialog_create("Can not call Callback " + callback + "<br>" + err + "<br>" + err.stack); }
 					}
 				}catch(err){
 					dialog_create("Die Antwort vom Server ist nicht gültig:<br>" + $("<div>").text(data).html() + "<br>" + err);
