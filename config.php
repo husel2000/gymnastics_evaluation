@@ -28,7 +28,7 @@ define("SITEAJAXSUFFIX","_ajax.php");
 //Database
 define("DBHOST","localhost");
 define("DBUSER","wettkampfuser");
-define("DBPASS","***REMOVED***");
+define("DBPASS","");
 define("DBNAME","wettkampf");
 
 //Include all Classes from lib-php
